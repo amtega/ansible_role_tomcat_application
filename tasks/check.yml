@@ -1,0 +1,18 @@
+---
+# Role check tasks
+
+- block:
+    - name: verify role mandatory variables
+      assert:
+        that:
+          - tomcat_application_name is defined
+        msg: missing mandatory role variable
+
+    - name: verify role mandatory variables
+      assert:
+        that:
+          - tomcat_application_instance in tomcat_application_server_instances
+        msg: application tomcat instance must be running in server
+  tags:
+    - role::tomcat
+    - role::tomcat::check

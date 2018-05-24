@@ -1,2 +1,19 @@
 ---
 # Role tasks
+
+- name: gather tomcat instances facts
+  import_tasks: facts.yml
+  tags:
+    - role::tomcat_application
+
+- name: sanity checks
+  import_tasks: check.yml
+  tags:
+    - role::tomcat_application
+    - role::tomtomcat_applicationcat::check
+
+- name: setup application directories
+  import_tasks: dirs.yml
+  tags:
+    - role::tomcat_application
+    - role::tomcat_application::dirs

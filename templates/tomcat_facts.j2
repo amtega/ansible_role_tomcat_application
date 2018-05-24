@@ -1,0 +1,21 @@
+{
+{% for process in tomcat_application_search_instances_result.stdout_lines | default([]) %}
+{% set fields=process.split(",") | map("trim") | list %}
+{% set process_user=fields[0] %}
+{% set process_group=fields[1] %}
+{% set process_command=fields[2] %}
+{% set process_home=process_command.split("-D") | select("match", "catalina.home") | first | regex_replace("catalina.home=", "") | trim %}
+{% set process_base=process_command.split("-D") | select("match", "catalina.base") | first | regex_replace("catalina.base=", "") | trim %}
+{% if ansible_local[tomcat_application_instance] is defined %}
+  "{{ tomcat_application_instance }}":
+{% else %}
+  "{{ process_base }}":
+{% endif %}
+    {
+      "base": "{{ process_base }}",
+      "home": "{{ process_home }}",
+      "user": "{{ process_user }}",
+      "group": "{{ process_group }}",
+    }{% if not loop.last %},{{ "\n" }}{% else %}{{ "\n" }}{% endif %}
+{% endfor %}
+}

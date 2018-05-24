@@ -1,0 +1,19 @@
+---
+# Tasks to get tomcat instances facts
+
+- block:
+    - name: search tomcat raw server instances processes
+      shell: >-
+        ps axo "%u,%g,%a"
+        | grep org.apache.catalina.startup.Bootstrap
+        | grep -v grep
+      register: tomcat_application_search_instances_result
+      changed_when: false
+      failed_when: false
+
+    - name: setup tomcat instances facts
+      set_fact:
+        tomcat_application_server_instances: >-
+          {{ lookup('template', 'tomcat_facts.j2') }}
+  tags:
+    - role::tomcat_application
