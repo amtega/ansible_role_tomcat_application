@@ -1,2 +1,74 @@
 ---
 # Tasks for testing role
+
+- name: run idempotence test
+  hosts: localhost
+  roles:
+    - role: amtega.docker_presets
+      docker_presets_images_json_query: >-
+        [? starts_with(name, `centos-6`)
+           || starts_with(name, `centos-7`)
+           || starts_with(name, `fedora-26`)
+           || starts_with(name, `fedora-27`) ]
+
+    - role: amtega.docker_sandbox
+      docker_sandbox_state: started
+  tags:
+    - sandbox
+
+- name: prepare docker containers for test
+  hosts: docker_sandbox_containers
+  roles:
+    - role: amtega.tomcat
+  vars:
+    tomcat_instances:
+      - name: tomcat@server1
+        version: 8.0.9
+  tags:
+      - sandbox
+
+- name: test tomcat_application role
+  hosts: docker_sandbox_containers
+  roles:
+    - role: amtega.tomcat_application
+  vars:
+    tomcat_instances:
+      - name: tomcat@server1
+        version: 8.0.9
+    tomcat_application_name: my_app
+    tomcat_application_instance: tomcat@server1
+    tomcat_application_dirs:
+      - "config/{{ tomcat_application_name }}"
+      - "log/{{ tomcat_application_name }}"
+      - "cert/{{ tomcat_application_name }}"
+      - "data/{{ tomcat_application_name }}"
+      - "resource/{{ tomcat_application_name }}"
+  tasks:
+    - name: search application dirs
+      stat:
+        path: "{{ instance.base}}/{{ item }}"
+      loop: "{{ tomcat_application_dirs }}"
+      register: check_application_dirs
+      loop_control:
+        label: "{{ instance.base}}/{{ item }}"
+      vars:
+        instance: >-
+          {{ tomcat_application_server_instances[tomcat_application_instance] }}
+
+    - name: check application dirs exist
+      assert:
+        that: item
+      loop: >-
+        {{ check_application_dirs.results
+           | map(attribute='stat.exists')
+           | list }}
+  tags:
+    - idempotence
+
+- name: cleanup docker docker sandbox
+  hosts: localhost
+  roles:
+    - role: amtega.docker_sandbox
+      docker_sandbox_state: absent
+  tags:
+    - sandbox
