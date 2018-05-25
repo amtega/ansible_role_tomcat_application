@@ -35,7 +35,7 @@
     tomcat_instances:
       - name: tomcat@server1
         version: 8.0.9
-    tomcat_application_name: my_app
+    tomcat_application_name: MyApp
     tomcat_application_instance: tomcat@server1
     tomcat_application_dirs:
       - "config/{{ tomcat_application_name }}"
@@ -43,6 +43,21 @@
       - "cert/{{ tomcat_application_name }}"
       - "data/{{ tomcat_application_name }}"
       - "resource/{{ tomcat_application_name }}"
+    tomcat_application_datasources:
+      - name: "jdbc/{{ tomcat_application_name }}DS"
+        auth: Container
+        type: acme.jdbc.pool.AcmeDataSource
+        factory: acme.jdbc.pool.AcmeDataSourceFactory
+        driver_class_name: acme.jdbc.AcmeDriver
+        url: dbc:acme:oci:@DATABASE
+        user: app
+        password: app_password
+        connection_wait_timeout: 0
+        connection_caching_enabled: true
+        connection_cache_name: "cache{{ tomcat_application_name }}"
+        connection_cache_min_limit: 4
+        connection_cache_max_limit: 100
+        connection_cache_initial_limit: 2
   tasks:
     - name: search application dirs
       stat:
@@ -62,6 +77,43 @@
         {{ check_application_dirs.results
            | map(attribute='stat.exists')
            | list }}
+
+    - name: read server config
+      shell: >-
+       cat {{ tomcat_application_server_instance.base }}/conf/server.xml
+      register: server_config_result
+      changed_when: false
+
+    - name: check datasources config
+      xml:
+        path: "{{ tomcat_application_server_instance.base }}/conf/server.xml"
+        xpath: >-
+          /Server/GlobalNamingResources/Resource[@name='{{ item.name }}']
+        content: attribute
+      register: ds
+      failed_when:
+        ds.matches[0].Resource.name != item.name | string
+        or ds.matches[0].Resource.auth != item.auth | string
+        or ds.matches[0].Resource.type != item.type | string
+        or ds.matches[0].Resource.factory != item.factory | string
+        or ds.matches[0].Resource.driverClassName
+           != item.driver_class_name | string
+        or ds.matches[0].Resource.url != item.url | string
+        or ds.matches[0].Resource.user != item.user | string
+        or ds.matches[0].Resource.password != item.password | string
+        or ds.matches[0].Resource.connectionWaitTimeout
+           != item.connection_wait_timeout | string
+        or ds.matches[0].Resource.connectionCachingEnabled
+           != item.connection_caching_enabled | string
+        or ds.matches[0].Resource.connectionCacheName
+           != item.connection_cache_name | string
+        or ds.matches[0].Resource.connectionCacheProperties
+           != "{MinLimit=4,MinLimit=100,MinLimit=2}"
+      loop: "{{ tomcat_application_datasources }}"
+      loop_control:
+        label: "{{ item.name }}"
+
+    - debug: var=ds
   tags:
     - idempotence
 
