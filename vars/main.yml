@@ -1,2 +1,27 @@
 ---
 # Role variables
+
+# Config files paths (relative to tomcat base)
+
+tomcat_application_server_config: conf/server.xml
+tomcat_application_context_config: conf/context.xml
+
+# Application instance facts
+
+tomcat_application_server_instance: >-
+  {{ tomcat_application_server_instances[tomcat_application_instance] }}
+
+# Datasource supported attributes mapping
+
+tomcat_application_datasource_attributes:
+  auth: auth
+  type: type
+  factory: factory
+  driver_class_name: driverClassName
+  url: url
+  user: user
+  password: password
+  connection_wait_timeout: connectionWaitTimeout
+  connection_caching_enabled: connectionCachingEnabled
+  connection_cache_name: connectionCacheName
+  connection_cache_properties: connectionCacheProperties
