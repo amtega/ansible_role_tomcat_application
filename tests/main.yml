@@ -112,8 +112,6 @@
       loop: "{{ tomcat_application_datasources }}"
       loop_control:
         label: "{{ item.name }}"
-
-    - debug: var=ds
   tags:
     - idempotence
 
