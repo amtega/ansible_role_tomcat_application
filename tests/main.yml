@@ -48,16 +48,14 @@
         auth: Container
         type: acme.jdbc.pool.AcmeDataSource
         factory: acme.jdbc.pool.AcmeDataSourceFactory
-        driver_class_name: acme.jdbc.AcmeDriver
-        url: dbc:acme:oci:@DATABASE
+        driverClassName: acme.jdbc.AcmeDriver
+        maxTotal: 100
+        maxIdle: 30
+        maxWaitMilli: 10000
+        url: dbc:acme:@DATABASE
         user: app
         password: app_password
-        connection_wait_timeout: 0
-        connection_caching_enabled: true
-        connection_cache_name: "cache{{ tomcat_application_name }}"
-        connection_cache_min_limit: 4
-        connection_cache_max_limit: 100
-        connection_cache_initial_limit: 2
+
   tasks:
     - name: search application dirs
       stat:
@@ -86,9 +84,9 @@
 
     - name: check datasources config
       xml:
-        path: "{{ tomcat_application_server_instance.base }}/conf/server.xml"
+        path: "{{ tomcat_application_server_instance.base }}/conf/context.xml"
         xpath: >-
-          /Server/GlobalNamingResources/Resource[@name='{{ item.name }}']
+          /Context/Resource[@name='{{ item.name }}']
         content: attribute
       register: ds
       failed_when:
@@ -97,18 +95,13 @@
         or ds.matches[0].Resource.type != item.type | string
         or ds.matches[0].Resource.factory != item.factory | string
         or ds.matches[0].Resource.driverClassName
-           != item.driver_class_name | string
+           != item.driverClassName | string
+        or ds.matches[0].Resource.maxTotal != item.maxTotal | string
+        or ds.matches[0].Resource.maxIdle != item.maxIdle | string
+        or ds.matches[0].Resource.maxWaitMilli != item.maxWaitMilli | string
         or ds.matches[0].Resource.url != item.url | string
         or ds.matches[0].Resource.user != item.user | string
         or ds.matches[0].Resource.password != item.password | string
-        or ds.matches[0].Resource.connectionWaitTimeout
-           != item.connection_wait_timeout | string
-        or ds.matches[0].Resource.connectionCachingEnabled
-           != item.connection_caching_enabled | string
-        or ds.matches[0].Resource.connectionCacheName
-           != item.connection_cache_name | string
-        or ds.matches[0].Resource.connectionCacheProperties
-           != "{MinLimit=4,MinLimit=100,MinLimit=2}"
       loop: "{{ tomcat_application_datasources }}"
       loop_control:
         label: "{{ item.name }}"

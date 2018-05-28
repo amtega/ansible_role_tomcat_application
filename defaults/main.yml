@@ -8,21 +8,15 @@
 tomcat_application_dirs: []
 
 # List of application datasources to provisione. The dicts must have the
-# following values:
+#  datasources attributes you want to use, for example this ones:
 #
 # { name: "jdbc/myAppDS"                      # Name
 #   auth: Container                           # Authentication
 #   type: acme.jdbc.AcmeDataSource            # Type class
 #   factory: acme.jdbc.AcmeDataSourceFactory  # Factory class
-#   driver_class_name: acme.jdbc.AcmeDriver   # Driver class
+#   driverClassName: acme.jdbc.AcmeDriver     # Driver class
 #   url: dbc:acme:oci:@DATABASE               # Url
 #   user: app                                 # User
-#   password: app_password                    # Password
-#   connection_wait_timeout: 0                # Connection timeout
-#   connection_caching_enabled: true          # Enable connection cache
-#   connection_cache_name: "cacheApp"         # Connection cache name
-#   connection_cache_min_limit: 4             # Connection cache minimum
-#   connection_cache_max_limit: 100           # Connection cache maximum
-#   connection_cache_initial_limit: 2         # Connection cache initial limit }
+#   password: app_password                    # Password }
 
 tomcat_application_datasources: []
