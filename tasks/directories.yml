@@ -9,12 +9,24 @@
         owner: "{{ instance.user }}"
         group: "{{ instance.group }}"
         mode: 0755
+      when: tomcat_application_state == "present"
       loop: "{{ tomcat_application_dirs }}"
       loop_control:
         loop_var: directory
-      vars:
-        instance: >-
-          {{ tomcat_application_server_instances[tomcat_application_instance] }}
+
+    - name: remove application directories
+      file:
+        path: "{{ instance.base }}/{{ directory }}"
+        state: absent
+      when:
+        - tomcat_application_state == "absent"
+        - tomcat_application_dirs_remove
+      loop: "{{ tomcat_application_dirs }}"
+      loop_control:
+        loop_var: directory
+  vars:
+    instance: >-
+      {{ tomcat_application_server_instances[tomcat_application_instance] }}
   tags:
     - role::tomcat_application
     - role::tomcat_application::dirs

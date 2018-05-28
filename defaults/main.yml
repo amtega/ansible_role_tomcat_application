@@ -1,11 +1,27 @@
 ---
 # Role default lower priority variables
 
+# Name of the tomcat application
+
 # tomcat_application_name:
+
+# Instance where the application must be deployed. If the tomcat server was
+# deployed using amtega.tomcat role you can use the name of the instance as
+# value. If not, you must use the instance base path as value.
 
 # tomcat_application_instance:
 
+# Application state. Can be "present" or "absent"
+
+tomcat_application_state: present
+
+# List of directories to create when application is deployed
+
 tomcat_application_dirs: []
+
+# Remove applications directories when application state is absent
+
+tomcat_application_dirs_remove: false
 
 # List of application datasources to provisione. The dicts must have the
 #  datasources attributes you want to use, for example this ones:

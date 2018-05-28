@@ -3,10 +3,7 @@
 - block:
     - name: setup application datasources attributes
       xml:
-        path: >-
-          {{ tomcat_application_server_instance.base
-             + "/"
-             + tomcat_application_context_config }}
+        path: "{{ xml_path }}"
         xpath: >-
           {{ (not ds_attribute_to_remove)
              | ternary(ds_xpath_base,
@@ -22,6 +19,7 @@
              | ternary("present", "absent") }}
         pretty_print: true
       register: tomcat_application_setup_ds_result
+      when: tomcat_application_state == "present"
       loop: >-
         {{ query('subelements',
                  lookup('template', 'datasources.yml.j2') | from_yaml,
@@ -33,6 +31,22 @@
         ds_attribute: "{{ item.1 }}"
         ds_attribute_value: "{{ item.0.attributes_values[item.1] }}"
         ds_attribute_to_remove: "{{ ds_attribute_value is none }}"
+
+    - name: remove application datasources
+      xml:
+        path: "{{ xml_path }}"
+        xpath: "/Context/Resource[@name='{{ item.name }}']"
+        state: absent
+        pretty_print: true
+      when: tomcat_application_state == "absent"
+      loop: "{{ tomcat_application_datasources }}"
+      loop_control:
+        label: "{{ item.name }}"
+  vars:
+    xml_path: >-
+      {{ tomcat_application_server_instance.base
+         + "/"
+         + tomcat_application_context_config }}
   tags:
     - role::tomcat_application
     - role::tomcat_application::dirs

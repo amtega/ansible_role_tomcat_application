@@ -20,21 +20,21 @@
   hosts: docker_sandbox_containers
   roles:
     - role: amtega.tomcat
+  tasks:
+    - name: configure tomcat application variables
+      set_fact:
   vars:
     tomcat_instances:
       - name: tomcat@server1
         version: 8.0.9
   tags:
-      - sandbox
+    - sandbox
 
-- name: test tomcat_application role
+- name: test tomcat_application role application deploy
   hosts: docker_sandbox_containers
   roles:
     - role: amtega.tomcat_application
   vars:
-    tomcat_instances:
-      - name: tomcat@server1
-        version: 8.0.9
     tomcat_application_name: MyApp
     tomcat_application_instance: tomcat@server1
     tomcat_application_dirs:
@@ -55,7 +55,6 @@
         url: dbc:acme:@DATABASE
         user: app
         password: app_password
-
   tasks:
     - name: search application dirs
       stat:
@@ -76,17 +75,10 @@
            | map(attribute='stat.exists')
            | list }}
 
-    - name: read server config
-      shell: >-
-       cat {{ tomcat_application_server_instance.base }}/conf/server.xml
-      register: server_config_result
-      changed_when: false
-
     - name: check datasources config
       xml:
         path: "{{ tomcat_application_server_instance.base }}/conf/context.xml"
-        xpath: >-
-          /Context/Resource[@name='{{ item.name }}']
+        xpath: "/Context/Resource[@name='{{ item.name }}']"
         content: attribute
       register: ds
       failed_when:
@@ -107,6 +99,54 @@
         label: "{{ item.name }}"
   tags:
     - idempotence
+
+- name: test tomcat_application role application undeploy
+  hosts: docker_sandbox_containers
+  roles:
+    - role: amtega.tomcat_application
+  vars:
+      tomcat_application_name: MyApp
+      tomcat_application_instance: tomcat@server1
+      tomcat_application_dirs:
+        - "config/{{ tomcat_application_name }}"
+        - "log/{{ tomcat_application_name }}"
+        - "cert/{{ tomcat_application_name }}"
+        - "data/{{ tomcat_application_name }}"
+        - "resource/{{ tomcat_application_name }}"
+      tomcat_application_datasources:
+        - name: "jdbc/{{ tomcat_application_name }}DS"
+      tomcat_application_state: absent
+      tomcat_application_dirs_remove: true
+  tasks:
+    - name: search application dirs
+      stat:
+        path: "{{ instance.base}}/{{ item }}"
+      loop: "{{ tomcat_application_dirs }}"
+      register: check_application_dirs
+      loop_control:
+        label: "{{ instance.base}}/{{ item }}"
+      vars:
+        instance: >-
+          {{ tomcat_application_server_instances[tomcat_application_instance] }}
+
+    - name: check application dirs exist
+      assert:
+        that: not item
+      loop: >-
+        {{ check_application_dirs.results
+           | map(attribute='stat.exists')
+           | list }}
+
+    - name: check datasources config
+      xml:
+        path: "{{ tomcat_application_server_instance.base }}/conf/context.xml"
+        xpath: "/Context/Resource[@name='{{ item.name }}']"
+        content: attribute
+      register: ds
+      failed_when: ds.matches is defined
+      loop: "{{ tomcat_application_datasources }}"
+      loop_control:
+        label: "{{ item.name }}"
 
 - name: cleanup docker docker sandbox
   hosts: localhost
