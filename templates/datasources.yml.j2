@@ -1,0 +1,5 @@
+{% for ds in tomcat_application_datasources %}
+- name: "{{ ds.name }}"
+  attributes_names: {{ ds.keys() | reject('equalto', 'name') | list | to_yaml }}
+  attributes_values: {{ ds | to_yaml }}
+{% endfor %}

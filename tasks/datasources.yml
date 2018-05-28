@@ -1,13 +1,9 @@
 ---
 # Tasks to setup application dirs
-
 - block:
     - name: setup application datasources attributes
       xml:
-        path: >-
-          {{ tomcat_application_server_instance.base
-             + "/"
-             + tomcat_application_server_config }}
+        path: "{{ xml_path }}"
         xpath: >-
           {{ (not ds_attribute_to_remove)
              | ternary(ds_xpath_base,
@@ -23,43 +19,34 @@
              | ternary("present", "absent") }}
         pretty_print: true
       register: tomcat_application_setup_ds_result
-      when: item.1 in item.0 or item.1 in ds_computed_attributes
+      when: tomcat_application_state == "present"
       loop: >-
-        {{ query('nested',
-                 tomcat_application_datasources,
-                 tomcat_application_datasource_attributes) }}
+        {{ query('subelements',
+                 lookup('template', 'datasources.yml.j2') | from_yaml,
+                 'attributes_names') }}
       loop_control:
         label: "{{ item.0.name }} {{ item.1 }}"
       vars:
-        ds_xpath_base: >-
-          /Server/GlobalNamingResources/Resource[@name='{{ item.0.name }}']
-        ds_attribute: >-
-          {{ tomcat_application_datasource_attributes[item.1] }}
-        ds_attribute_value: >-
-          {{ item.0[item.1]
-             | default(ds_computed_attributes[item.1]) }}
-        ds_attribute_to_remove: >-
-          {{ item.0[item.1] is none }}
-        ds_cache_properties_strings:
-          - >-
-            {{ (item.0.connection_cache_min_limit is defined)
-               | ternary("MinLimit=" + item.0.connection_cache_min_limit
-                         | string,
-                         "") }}
-          - >-
-            {{ (item.0.connection_cache_max_limit is defined)
-               | ternary("MinLimit=" + item.0.connection_cache_max_limit
-                         | string,
-                         "") }}
-          - >-
-            {{ (item.0.connection_cache_initial_limit is defined)
-               | ternary("MinLimit=" + item.0.connection_cache_initial_limit
-                         | string,
-                         "") }}
-        ds_cache_properties: >-
-          {{ '{' + ds_cache_properties_strings | join(',') + '}' }}
-        ds_computed_attributes:
-          connection_cache_properties: "{{ ds_cache_properties }}"
+        ds_xpath_base: "/Context/Resource[@name='{{ item.0.name }}']"
+        ds_attribute: "{{ item.1 }}"
+        ds_attribute_value: "{{ item.0.attributes_values[item.1] }}"
+        ds_attribute_to_remove: "{{ ds_attribute_value is none }}"
+
+    - name: remove application datasources
+      xml:
+        path: "{{ xml_path }}"
+        xpath: "/Context/Resource[@name='{{ item.name }}']"
+        state: absent
+        pretty_print: true
+      when: tomcat_application_state == "absent"
+      loop: "{{ tomcat_application_datasources }}"
+      loop_control:
+        label: "{{ item.name }}"
+  vars:
+    xml_path: >-
+      {{ tomcat_application_server_instance.base
+         + "/"
+         + tomcat_application_context_config }}
   tags:
     - role::tomcat_application
     - role::tomcat_application::dirs
