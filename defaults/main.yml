@@ -24,7 +24,7 @@ tomcat_application_dirs: []
 tomcat_application_dirs_remove: false
 
 # List of application datasources to provisione. The dicts must have the
-#  datasources attributes you want to use, for example this ones:
+# datasources attributes you want to use, for example this ones:
 #
 # { name: "jdbc/myAppDS"                      # Name
 #   auth: Container                           # Authentication
@@ -36,3 +36,37 @@ tomcat_application_dirs_remove: false
 #   password: app_password                    # Password }
 
 tomcat_application_datasources: []
+
+# List of application artifacts to deploy. The dicts must have the
+# following structure:
+#
+# { url: https://ascme.com/sample.war # Url to the artifact downloadable.
+#                                     # Se below for details.
+#   dest: webapps                     # Where to deposit the artifact.
+#                                     # The path is relative to tomcat base
+#   username: acme                    # User name for basic http authentication
+#   password: acme                    # Password for basic http authentication }
+#
+# These are the supported artifact's url protocols:
+#
+# - http: for http downloadable artifact
+# - https: for https downloadable artifact
+# - file: for a file stored localy on the tomcat machine
+
+tomcat_application_artifacts: []
+
+#
+# Proxy settings
+#
+
+# IP address and port, or URL, for using an http_proxy.
+
+#tomcat_application_http_proxy:
+
+# IP address and port, or URL, for using an https_proxy.
+
+#tomcat_application_https_proxy:
+
+# Exclude IP address or URL from the proxy.
+
+#tomcat_application_no_proxy:

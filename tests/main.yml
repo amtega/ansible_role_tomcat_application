@@ -1,6 +1,8 @@
 ---
 # Tasks for testing role
 
+# FIXME: Check also sample application http visibility
+
 - name: run idempotence test
   hosts: localhost
   roles:
@@ -23,12 +25,16 @@
   tasks:
     - name: configure tomcat application variables
       set_fact:
-  vars:
-    tomcat_instances:
-      - name: tomcat@server1
-        version: 8.0.9
+        tomcat_instances:
+          - name: tomcat@server1
+            version: 8.0.9
+
+    - name: download sample application
+      get_url:
+        url: https://tomcat.apache.org/tomcat-8.0-doc/appdev/sample/sample.war
+        dest: /tmp
   tags:
-    - sandbox
+    - prepare
 
 - name: test tomcat_application role application deploy
   hosts: docker_sandbox_containers
@@ -37,6 +43,13 @@
   vars:
     tomcat_application_name: MyApp
     tomcat_application_instance: tomcat@server1
+    tomcat_application_artifacts:
+      - url: https://tomcat.apache.org/tomcat-8.0-doc/appdev/sample/sample.war
+        dest: webapps
+      - url: https://tomcat.apache.org/tomcat-8.0-doc/appdev/sample/sample.war
+        dest: webapps/sample2.war
+      - url: file:///tmp/sample.war
+        dest: webapps/sample3.war
     tomcat_application_dirs:
       - "config/{{ tomcat_application_name }}"
       - "log/{{ tomcat_application_name }}"
@@ -44,7 +57,19 @@
       - "data/{{ tomcat_application_name }}"
       - "resource/{{ tomcat_application_name }}"
     tomcat_application_datasources:
-      - name: "jdbc/{{ tomcat_application_name }}DS"
+      - name: "jdbc/{{ tomcat_application_name }}DS01"
+        auth: Container
+        type: acme.jdbc.pool.AcmeDataSource
+        factory: acme.jdbc.pool.AcmeDataSourceFactory
+        driverClassName: acme.jdbc.AcmeDriver
+        maxTotal: 100
+        maxIdle: 30
+        maxWaitMilli: 10000
+        url: dbc:acme:@DATABASE
+        user: app
+        password: app_password
+
+      - name: "jdbc/{{ tomcat_application_name }}DS02"
         auth: Container
         type: acme.jdbc.pool.AcmeDataSource
         factory: acme.jdbc.pool.AcmeDataSourceFactory
@@ -58,20 +83,17 @@
   tasks:
     - name: search application dirs
       stat:
-        path: "{{ instance.base}}/{{ item }}"
+        path: "{{ tomcat_application_server_instance.base }}/{{ item }}"
       loop: "{{ tomcat_application_dirs }}"
-      register: check_application_dirs
+      register: check_application_dirs_result
       loop_control:
-        label: "{{ instance.base}}/{{ item }}"
-      vars:
-        instance: >-
-          {{ tomcat_application_server_instances[tomcat_application_instance] }}
+        label: "{{ tomcat_application_server_instance.base }}/{{ item }}"
 
     - name: check application dirs exist
       assert:
         that: item
       loop: >-
-        {{ check_application_dirs.results
+        {{ check_application_dirs_result.results
            | map(attribute='stat.exists')
            | list }}
 
@@ -97,6 +119,23 @@
       loop: "{{ tomcat_application_datasources }}"
       loop_control:
         label: "{{ item.name }}"
+
+    - name: search application artifacts
+      stat:
+        path: "{{ item }}"
+      loop:
+        - /srv/tomcat/tomcat@server1/webapps/sample.war
+        - /srv/tomcat/tomcat@server1/webapps/sample2.war
+        - /srv/tomcat/tomcat@server1/webapps/sample3.war
+      register: check_artifacts_result
+
+    - name: check application artifacts exist
+      assert:
+        that: item
+      loop: >-
+        {{ check_artifacts_result.results
+           | map(attribute='stat.exists')
+           | list }}
   tags:
     - idempotence
 
@@ -105,8 +144,15 @@
   roles:
     - role: amtega.tomcat_application
   vars:
-      tomcat_application_name: MyApp
+      tomcat_application_name: sample
       tomcat_application_instance: tomcat@server1
+      tomcat_application_artifacts:
+        - url: https://tomcat.apache.org/tomcat-8.0-doc/appdev/sample/sample.war
+          dest: webapps
+        - url: https://tomcat.apache.org/tomcat-8.0-doc/appdev/sample/sample.war
+          dest: webapps/sample2.war
+        - url: file:///tmp/sample.war
+          dest: webapps/sample3.war
       tomcat_application_dirs:
         - "config/{{ tomcat_application_name }}"
         - "log/{{ tomcat_application_name }}"
@@ -120,20 +166,17 @@
   tasks:
     - name: search application dirs
       stat:
-        path: "{{ instance.base}}/{{ item }}"
+        path: "{{ tomcat_application_server_instance.base }}/{{ item }}"
       loop: "{{ tomcat_application_dirs }}"
-      register: check_application_dirs
+      register: check_application_dirs_result
       loop_control:
-        label: "{{ instance.base}}/{{ item }}"
-      vars:
-        instance: >-
-          {{ tomcat_application_server_instances[tomcat_application_instance] }}
+        label: "{{ tomcat_application_server_instance.base }}/{{ item }}"
 
-    - name: check application dirs exist
+    - name: check application dirs does not exist
       assert:
         that: not item
       loop: >-
-        {{ check_application_dirs.results
+        {{ check_application_dirs_result.results
            | map(attribute='stat.exists')
            | list }}
 
@@ -147,6 +190,26 @@
       loop: "{{ tomcat_application_datasources }}"
       loop_control:
         label: "{{ item.name }}"
+
+    - name: search application artifacts
+      stat:
+        path: "{{ item }}"
+      loop:
+        - /srv/tomcat/tomcat@server1/webapps/sample.war
+        - /srv/tomcat/tomcat@server1/webapps/sample2.war
+        - /srv/tomcat/tomcat@server1/webapps/sample3.war
+        - /srv/tomcat/tomcat@server1/webapps/sample
+        - /srv/tomcat/tomcat@server1/webapps/sample2
+        - /srv/tomcat/tomcat@server1/webapps/sample3
+      register: check_application_artifacts_result
+
+    - name: check application artifacts does not exist
+      assert:
+        that: not item
+      loop: >-
+        {{ check_application_artifacts_result.results
+           | map(attribute='stat.exists')
+           | list }}
 
 - name: cleanup docker docker sandbox
   hosts: localhost
