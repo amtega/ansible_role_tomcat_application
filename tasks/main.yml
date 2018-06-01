@@ -23,3 +23,9 @@
   tags:
     - role::tomcat_application
     - role::tomcat_application::datasources
+
+- name: setup application artifacts
+  import_tasks: artifacts.yml
+  tags:
+    - role::tomcat_application
+    - role::tomcat_application::artifacts

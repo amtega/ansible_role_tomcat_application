@@ -10,3 +10,16 @@ tomcat_application_context_config: conf/context.xml
 
 tomcat_application_server_instance: >-
   {{ tomcat_application_server_instances[tomcat_application_instance] }}
+
+# Proxy environment settings
+
+tomcat_application_http_proxy_config:
+    http_proxy: "{{ tomcat_application_http_proxy | default('') }}"
+    https_proxy: "{{ tomcat_application_https_proxy | default('') }}"
+    http_no_proxy: "{{ tomcat_application_http_no_proxy | default('') }}"
+
+tomcat_application_http_proxy_environment: >-
+  {{ (tomcat_application_http_proxy is defined
+      or tomcat_application_https_proxy is defined
+      or tomcat_application_http_no_proxy is defined)
+     | ternary(tomcat_application_http_proxy_config, {}) }}

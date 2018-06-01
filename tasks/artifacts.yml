@@ -1,0 +1,71 @@
+---
+# Tasks to setup application artifacts
+
+- block:
+    - name: deploy http/https/file artifacts
+      get_url:
+        url: "{{ artifact.url }}"
+        dest: "{{ instance.base }}/{{ artifact.dest }}"
+        force: yes
+        url_username: "{{ artifact.username | default(omit) }}"
+        url_password: "{{ artifact.password | default(omit) }}"
+      environment: "{{ tomcat_application_http_proxy_environment }}"
+      when:
+        - tomcat_application_state == "present"
+        - protocol in ["http", "https", "file"]
+      loop: "{{ tomcat_application_artifacts }}"
+      loop_control:
+        loop_var: artifact
+        label: "{{ artifact.url }}"
+
+    - block:
+        - name: remove http/https/file artifacts downloadable
+          file:
+            path: "{{ artifact_downloadable }}"
+            state: absent
+          loop: "{{ tomcat_application_artifacts }}"
+          loop_control:
+            loop_var: artifact
+            label: "{{ artifact_downloadable }}"
+          vars:
+            artifact_downloadable: >-
+              {{ (artifact.dest is search("\.war$"))
+                 | ternary(instance.base
+                           + "/"
+                           + artifact.dest,
+                           instance.base
+                           + "/"
+                           + artifact.dest
+                           + "/"
+                           + artifact_url_file) }}
+
+        - name: remove http/https/file artifacts deoployed directories
+          file:
+            path: "{{ artifact_deployed_dir }}"
+            state: absent
+          loop: "{{ tomcat_application_artifacts }}"
+          loop_control:
+            loop_var: artifact
+            label: "{{ artifact_deployed_dir }}"
+          vars:
+            artifact_deployed_dir: >-
+              {{ (artifact.dest is search("\.war$"))
+                 | ternary(instance.base + "/" + (artifact.dest | splitext).0,
+                           instance.base
+                           + "/"
+                           + artifact.dest
+                           + "/"
+                           + (artifact_url_file | splitext).0) }}
+      when:
+        - tomcat_application_state == "absent"
+        - protocol in ["http", "https", "file"]
+      vars:
+        artifact_url_file: "{{ artifact.url | urlsplit('path') | basename }}"
+  vars:
+    instance: >-
+      {{ tomcat_application_server_instances[tomcat_application_instance] }}
+    protocol: "{{ artifact.url | regex_replace('(.*)://.*', '\\1') }}"
+
+  tags:
+    - role::tomcat_application
+    - role::tomcat_application::artifacts
