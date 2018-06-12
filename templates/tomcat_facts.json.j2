@@ -1,21 +1,45 @@
-{
-{% for process in tomcat_application_search_instances_result.stdout_lines | default([]) %}
-{% set fields=process.split(",") | map("trim") | list %}
-{% set process_user=fields[0] %}
-{% set process_group=fields[1] %}
-{% set process_command=fields[2] %}
-{% set process_home=process_command.split("-D") | select("match", "catalina.home") | first | regex_replace("catalina.home=", "") | trim %}
-{% set process_base=process_command.split("-D") | select("match", "catalina.base") | first | regex_replace("catalina.base=", "") | trim %}
-{% if ansible_local[tomcat_application_instance] is defined %}
-  "{{ tomcat_application_instance }}":
-{% else %}
-  "{{ process_base }}":
+{% for process in tomcat_application_search_instances_result.stdout_lines
+                  | default([]) %}
+{% set fields = process.split(",")
+                | map("trim")
+                | list %}
+{% set process_user = fields[0] %}
+{% set process_group = fields[1] %}
+{% set process_command = fields[2] %}
+{% set process_home = process_command.split("-D")
+                      | select("match", "catalina.home")
+                      | first
+                      | regex_replace("catalina.home=", "")
+                      | trim %}
+{% set process_base = process_command.split("-D")
+                      | select("match", "catalina.base")
+                      | first
+                      | regex_replace("catalina.base=", "")
+                      | trim %}
+{% set process_host_config = (tomcat_application_check_autodeploy_result.results
+                              | selectattr("item",
+                                           "search",
+                                           "catalina.base=" + process_base)
+                              | first)["matches"][0]["Host"] %}
+{% set process_autodeploy = process_host_config["autoDeploy"] %}
+
+{% set ns = namespace(instance_name=none) %}
+
+{% for instance in tomcat_application_instances %}
+{% if (ansible_local[instance] is defined
+       and ansible_local[instance].base == process_base)
+      or (instance == process_base) %}
+{% set ns.instance_name = instance %}
 {% endif %}
-    {
-      "base": "{{ process_base }}",
-      "home": "{{ process_home }}",
-      "user": "{{ process_user }}",
-      "group": "{{ process_group }}",
-    }{% if not loop.last %},{{ "\n" }}{% else %}{{ "\n" }}{% endif %}
 {% endfor %}
-}
+
+{% if ns.instance_name is not none %}
+- "name": "{{ ns.instance_name }}"
+  "base": "{{ process_base }}"
+  "home": "{{ process_home }}"
+  "user": "{{ process_user }}"
+  "group": "{{ process_group }}"
+  "autodeploy": {{ process_autodeploy }}
+{% endif %}
+
+{% endfor %}

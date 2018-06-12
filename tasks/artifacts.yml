@@ -4,68 +4,79 @@
 - block:
     - name: deploy http/https/file artifacts
       get_url:
-        url: "{{ artifact.url }}"
-        dest: "{{ instance.base }}/{{ artifact.dest }}"
+        url: "{{ item.1.url }}"
+        dest: "{{ item.0.base }}/{{ item.1.dest }}"
         force: yes
-        url_username: "{{ artifact.username | default(omit) }}"
-        url_password: "{{ artifact.password | default(omit) }}"
+        url_username: "{{ item.1.username | default(omit) }}"
+        url_password: "{{ item.1.password | default(omit) }}"
+        timeout: "{{ item.1.timeout | default(omit) }}"
+        validate_certs: "{{ item.1.validate_certs | default(omit) }}"
       environment: "{{ tomcat_application_http_proxy_environment }}"
       when:
         - tomcat_application_state == "present"
         - protocol in ["http", "https", "file"]
-      loop: "{{ tomcat_application_artifacts }}"
+      register: tomcat_application_deploy_result
+      loop: >-
+        {{ query('nested',
+                 tomcat_application_server_instances,
+                 tomcat_application_artifacts) }}
       loop_control:
-        loop_var: artifact
-        label: "{{ artifact.url }}"
+        label: "{{ item.1.url }} {{ item.0.base }}/{{ item.1.dest }}"
+      notify:
+        - shutdown tomcat instance
 
     - block:
         - name: remove http/https/file artifacts downloadable
           file:
             path: "{{ artifact_downloadable }}"
             state: absent
-          loop: "{{ tomcat_application_artifacts }}"
+          register: tomcat_application_undeploy_artifacts_result
+          loop: >-
+            {{ query('nested',
+                     tomcat_application_server_instances,
+                     tomcat_application_artifacts) }}
           loop_control:
-            loop_var: artifact
             label: "{{ artifact_downloadable }}"
-          vars:
-            artifact_downloadable: >-
-              {{ (artifact.dest is search("\.war$"))
-                 | ternary(instance.base
-                           + "/"
-                           + artifact.dest,
-                           instance.base
-                           + "/"
-                           + artifact.dest
-                           + "/"
-                           + artifact_url_file) }}
+          notify:
+            - shutdown tomcat instance
 
-        - name: remove http/https/file artifacts deoployed directories
+        - name: remove http/https/file artifacts deployed directories
           file:
             path: "{{ artifact_deployed_dir }}"
             state: absent
-          loop: "{{ tomcat_application_artifacts }}"
+          register: tomcat_application_undeploy_artifacts_dirs_result
+          loop: >-
+            {{ query('nested',
+                     tomcat_application_server_instances,
+                     tomcat_application_artifacts) }}
           loop_control:
-            loop_var: artifact
             label: "{{ artifact_deployed_dir }}"
-          vars:
-            artifact_deployed_dir: >-
-              {{ (artifact.dest is search("\.war$"))
-                 | ternary(instance.base + "/" + (artifact.dest | splitext).0,
-                           instance.base
-                           + "/"
-                           + artifact.dest
-                           + "/"
-                           + (artifact_url_file | splitext).0) }}
+          notify:
+            - shutdown tomcat instance
       when:
         - tomcat_application_state == "absent"
         - protocol in ["http", "https", "file"]
-      vars:
-        artifact_url_file: "{{ artifact.url | urlsplit('path') | basename }}"
   vars:
-    instance: >-
-      {{ tomcat_application_server_instances[tomcat_application_instance] }}
-    protocol: "{{ artifact.url | regex_replace('(.*)://.*', '\\1') }}"
-
+    protocol: "{{ item.1.url | regex_replace('(.*)://.*', '\\1') }}"
+    artifact_url_file: "{{ item.1.url | urlsplit('path') | basename }}"
+    artifact_downloadable: >-
+      {{ (item.1.dest is search("\.war$"))
+         | ternary(item.0.base
+                   + "/"
+                   + item.1.dest,
+                   item.0.base
+                   + "/"
+                   + item.1.dest
+                   + "/"
+                   + artifact_url_file) }}
+    artifact_deployed_dir: >-
+      {{ (item.1.dest is search("\.war$"))
+         | ternary(item.0.base + "/" + (item.1.dest | splitext).0,
+                   item.0.base
+                   + "/"
+                   + item.1.dest
+                   + "/"
+                   + (artifact_url_file | splitext).0) }}
   tags:
     - role::tomcat_application
     - role::tomcat_application::artifacts

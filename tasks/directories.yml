@@ -4,29 +4,32 @@
 - block:
     - name: setup application directories
       file:
-        path: "{{ instance.base }}/{{ directory }}"
+        path: "{{ item.0.base }}/{{ item.1 }}"
         state: directory
-        owner: "{{ instance.user }}"
-        group: "{{ instance.group }}"
+        owner: "{{ item.0.user }}"
+        group: "{{ item.0.group }}"
         mode: 0755
       when: tomcat_application_state == "present"
-      loop: "{{ tomcat_application_dirs }}"
+      loop: >-
+        {{ query('nested',
+                 tomcat_application_server_instances,
+                 tomcat_application_dirs) }}
       loop_control:
-        loop_var: directory
+        label: "{{ item.0.base }}/{{ item.1 }}"
 
     - name: remove application directories
       file:
-        path: "{{ instance.base }}/{{ directory }}"
+        path: "{{ item.0.base }}/{{ item.1 }}"
         state: absent
       when:
         - tomcat_application_state == "absent"
         - tomcat_application_dirs_remove
-      loop: "{{ tomcat_application_dirs }}"
+      loop: >-
+        {{ query('nested',
+                 tomcat_application_server_instances,
+                 tomcat_application_dirs) }}
       loop_control:
-        loop_var: directory
-  vars:
-    instance: >-
-      {{ tomcat_application_server_instances[tomcat_application_instance] }}
+        label: "{{ item.0.base }}/{{ item.1 }}"
   tags:
     - role::tomcat_application
     - role::tomcat_application::dirs
