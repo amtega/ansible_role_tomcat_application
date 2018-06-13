@@ -23,16 +23,34 @@ This is an example playbook:
 
 - hosts: all
   roles:
-    - amtega.application
-      tomcat_application_list:
-        - name: my_app
-          instance: server1
-          directories:
-            - "/svm/tomcat/server/config/{{ application.name }}"
-            - "/svm/tomcat/server/logs/{{ application.name }}"
-            - "/svm/tomcat/server/cert/{{ application.name }}"
-            - "/svm/tomcat/server/data/{{ application.name }}"
-            - "/svm/tomcat/server/resource/{{ application.name }}"                 
+    - role: tomcat_application
+      tomcat_application_name: sample
+      tomcat_application_instances:
+        - tomcat@server1
+        - tomcat@server2
+      tomcat_application_artifacts:
+        - url: https://tomcat.apache.org/tomcat-8.0-doc/appdev/sample/sample.war
+          dest: webapps
+          timeout: 60
+          validate_certs: false        
+      tomcat_application_dirs:
+        - "config/wanda"
+        - "log/wanda"
+        - "cert/wanda"
+        - "data/wanda"
+        - "resource/wanda"
+      tomcat_application_datasources:
+        - name: "jdbc/wandaDataSource"
+          auth: Container
+          type: acme.jdbc.pool.AcmeDataSource
+          factory: acme.jdbc.pool.AcmeDataSourceFactory
+          driverClassName: acme.jdbc.AcmeDriver
+          maxTotal: 100
+          maxIdle: 30
+          maxWaitMilli: 10000
+          url: dbc:acme:@DATABASE
+          user: app
+          password: app_password        
 ```
 
 ## Testing

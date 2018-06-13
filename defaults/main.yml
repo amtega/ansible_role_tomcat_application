@@ -5,11 +5,11 @@
 
 # tomcat_application_name:
 
-# Instance where the application must be deployed. If the tomcat server was
-# deployed using amtega.tomcat role you can use the name of the instance as
+# List of instances where the application must be deployed. If the tomcat server
+# was deployed using amtega.tomcat role you can use the name of the instance as
 # value. If not, you must use the instance base path as value.
 
-# tomcat_application_instance:
+tomcat_application_instances: []
 
 # Application state. Can be "present" or "absent"
 
@@ -45,7 +45,9 @@ tomcat_application_datasources: []
 #   dest: webapps                     # Where to deposit the artifact.
 #                                     # The path is relative to tomcat base
 #   username: acme                    # User name for basic http authentication
-#   password: acme                    # Password for basic http authentication }
+#   password: acme                    # Password for basic http authentication
+#   timeout: 60                       # Timeout for downloads
+#   validate_certs: true              # Validate SSL certificates }
 #
 # These are the supported artifact's url protocols:
 #
@@ -54,6 +56,23 @@ tomcat_application_datasources: []
 # - file: for a file stored localy on the tomcat machine
 
 tomcat_application_artifacts: []
+
+# Tocmat startup and shutdown scripts (relative to instance base)
+
+tomcat_application_instance_startup: bin/startup.sh
+tomcat_application_instance_shutdown: bin/shutdown.sh
+
+# Number of seconds to wait after shutdown to startup tomcat instance again
+
+tomcat_application_instance_restart_pause: 1
+
+# Become method to use to change to tomcat user
+
+tomcat_application_instance_restart_become_method: su
+
+# Max time given to the tomcat autodeploy process to complete the task
+
+tomcat_application_autodeply_max_time: 300
 
 #
 # Proxy settings

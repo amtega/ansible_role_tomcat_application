@@ -1,9 +1,10 @@
 ---
 # Tasks to setup application dirs
+
 - block:
     - name: setup application datasources attributes
       xml:
-        path: "{{ xml_path }}"
+        path: "{{ ds_path }}"
         xpath: >-
           {{ (not ds_attribute_to_remove)
              | ternary(ds_xpath_base,
@@ -25,8 +26,11 @@
                  lookup('template', 'datasources.yml.j2') | from_yaml,
                  'attributes_names') }}
       loop_control:
-        label: "{{ item.0.name }} {{ item.1 }}"
+        label: "{{ ds_path }} {{ item.0.name }} {{ item.1 }}"
+      notify:
+        - shutdown tomcat instance
       vars:
+        ds_path: "{{ item.0.base }}/{{ tomcat_application_context_config }}"
         ds_xpath_base: "/Context/Resource[@name='{{ item.0.name }}']"
         ds_attribute: "{{ item.1 }}"
         ds_attribute_value: "{{ item.0.attributes_values[item.1] }}"
@@ -34,19 +38,20 @@
 
     - name: remove application datasources
       xml:
-        path: "{{ xml_path }}"
-        xpath: "/Context/Resource[@name='{{ item.name }}']"
+        path: "{{ item.0.base }}/{{ tomcat_application_context_config }}"
+        xpath: "/Context/Resource[@name='{{ item.1.name }}']"
         state: absent
         pretty_print: true
       when: tomcat_application_state == "absent"
-      loop: "{{ tomcat_application_datasources }}"
+      register: tomcat_application_remove_ds_result
+      loop: >-
+        {{ query('nested',
+                 tomcat_application_server_instances,
+                 tomcat_application_datasources) }}
       loop_control:
-        label: "{{ item.name }}"
-  vars:
-    xml_path: >-
-      {{ tomcat_application_server_instance.base
-         + "/"
-         + tomcat_application_context_config }}
+        label: "{{ item.1.name }}"
+      notify:
+        - shutdown tomcat instance
   tags:
     - role::tomcat_application
     - role::tomcat_application::dirs

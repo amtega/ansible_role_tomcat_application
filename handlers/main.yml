@@ -1,0 +1,56 @@
+---
+# Handlers to restart tomcat instance
+
+- block:
+    - name: tomcat_application shutdown tomcat instance
+      shell: >-
+        {{ instance.base }}/{{ tomcat_application_instance_shutdown }} ;
+        sleep {{ tomcat_application_instance_restart_pause }}
+      loop: "{{ tomcat_application_server_instances }}"
+      loop_control:
+        loop_var: instance
+        label: "{{ instance.name }}"
+      notify:
+        - start tomcat instance
+      become: yes
+      become_user: "{{ instance.user }}"
+      become_method: "{{ tomcat_application_instance_restart_become_method }}"
+      listen: shutdown tomcat instance
+
+      # To start we have to consider that eventually the process could have
+      # been restart againg by underlying software as systemd. So, we accept as
+      # valid return state !=0 if the process is running
+
+    - name: tomcat_application start tomcat instance
+      shell: "{{ instance.base }}/{{ tomcat_application_instance_startup }}"
+      register: tomcat_application_start_instance_result
+      failed_when: >-
+        tomcat_application_start_instance_result.rc != 0
+        and not tomcat_application_start_instance_result.stdout
+                is search("Tomcat appears to still be running")
+      loop: "{{ tomcat_application_server_instances }}"
+      loop_control:
+        loop_var: instance
+        label: "{{ instance.name }}"
+      become: yes
+      become_user: "{{ instance.user }}"
+      become_method: "{{ tomcat_application_instance_restart_become_method }}"
+      listen: start tomcat instance
+  when: >-
+    (not instance.autodeploy
+     and (tomcat_application_deploy_result.results
+          + tomcat_application_undeploy_artifacts_result.results
+          + tomcat_application_undeploy_artifacts_dirs_result.results)
+         | select('changed')
+         | selectattr("item.0.base", "equalto", instance.base)
+         | list
+         | length > 0)
+    or (tomcat_application_setup_ds_result.results
+        + tomcat_application_remove_ds_result.results)
+       | select('changed')
+       | selectattr("item.0.base", "equalto", instance.base)
+       | list
+       | length > 0
+  tags:
+    - role::tomcat_application
+    - role::tomcat_application::instance

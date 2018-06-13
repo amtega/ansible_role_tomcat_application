@@ -11,9 +11,34 @@
       changed_when: false
       failed_when: false
 
+    - name: check instances autodeploy settings
+      xml:
+        path: "{{ config_path }}"
+        xpath: "{{ host_xpath }}"
+        content: attribute
+      register: tomcat_application_check_autodeploy_result
+      loop: >-
+        {{ tomcat_application_search_instances_result.stdout_lines
+           | default([]) }}
+      loop_control:
+        label: "{{ tomcat_base }}"
+      vars:
+        fields: "{{ item.split(',') | map('trim') | list }}"
+        command: "{{ fields[2] }}"
+        tomcat_base: >-
+          {{ command.split("-D")
+            | select("match", "catalina.base")
+            | first
+            | regex_replace("catalina.base=", "")
+            | trim }}
+        service_xpath: "/Server/Service[@name='Catalina']"
+        engine_xpath: "{{ service_xpath }}/Engine[@name='Catalina']"
+        host_xpath: "{{ engine_xpath }}/Host[@name='localhost']"
+        config_path: "{{ tomcat_base }}/{{ tomcat_application_server_config }}"
+
     - name: setup tomcat instances facts
       set_fact:
         tomcat_application_server_instances: >-
-          {{ lookup('template', 'tomcat_facts.json.j2') }}
+          {{ lookup('template', 'tomcat_facts.json.j2') | from_yaml }}
   tags:
     - role::tomcat_application

@@ -11,8 +11,14 @@
     - name: verify role mandatory variables
       assert:
         that:
-          - tomcat_application_instance in tomcat_application_server_instances
-        msg: application tomcat instance must be running in server
+          - item in server_instances_names
+        msg: "application tomcat instance must be running in server"
+      loop: "{{ tomcat_application_instances }}"
+      vars:
+        server_instances_names: >-
+          {{ tomcat_application_server_instances
+             | map(attribute="name")
+             | list }}
   tags:
-    - role::tomcat
-    - role::tomcat::check
+    - role::tomcat_application
+    - role::tomcat_application::check
