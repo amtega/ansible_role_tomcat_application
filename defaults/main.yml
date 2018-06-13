@@ -64,7 +64,7 @@ tomcat_application_instance_shutdown: bin/shutdown.sh
 
 # Number of seconds to wait after shutdown to startup tomcat instance again
 
-tomcat_application_instance_restart_pause: 2
+tomcat_application_instance_restart_pause: 1
 
 # Become method to use to change to tomcat user
 
