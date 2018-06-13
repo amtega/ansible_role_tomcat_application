@@ -4,7 +4,7 @@
 - block:
     - name: setup application datasources attributes
       xml:
-        path: "{{ item.0.path }}"
+        path: "{{ ds_path }}"
         xpath: >-
           {{ (not ds_attribute_to_remove)
              | ternary(ds_xpath_base,
@@ -26,10 +26,11 @@
                  lookup('template', 'datasources.yml.j2') | from_yaml,
                  'attributes_names') }}
       loop_control:
-        label: "{{ item.0.path }} {{ item.0.name }} {{ item.1 }}"
+        label: "{{ ds_path }} {{ item.0.name }} {{ item.1 }}"
       notify:
         - shutdown tomcat instance
       vars:
+        ds_path: "{{ item.0.base }}/{{ tomcat_application_context_config }}"
         ds_xpath_base: "/Context/Resource[@name='{{ item.0.name }}']"
         ds_attribute: "{{ item.1 }}"
         ds_attribute_value: "{{ item.0.attributes_values[item.1] }}"
