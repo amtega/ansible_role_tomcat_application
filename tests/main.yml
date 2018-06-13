@@ -159,8 +159,13 @@
            | list }}
 
     - name: check application is working
-      assert:
-        that: lookup('url', item) is search("Sample.*Hello.*World.*Application")
+      uri:
+        url: "{{ item }}"
+        return_content: yes
+      register: check_application_result
+      failed_when: >-
+         not check_application_result.content
+             is search("Sample.*Hello.*World.*Application")
       loop:
         - http://localhost:8080/sample
         - http://localhost:8080/sample2
@@ -256,6 +261,22 @@
         {{ check_application_artifacts_result.results
            | map(attribute='stat.exists')
            | list }}
+
+    - name: check application is not working
+      uri:
+        url: "{{ item }}"
+        return_content: yes
+      register: check_application_result
+      failed_when: >-
+        check_application_result.content
+             is search("Sample.*Hello.*World.*Application")
+      loop:
+        - http://localhost:8080/sample
+        - http://localhost:8080/sample2
+        - http://localhost:8080/sample3
+        - http://localhost:8081/sample
+        - http://localhost:8081/sample2
+        - http://localhost:8081/sample3
 
 - name: cleanup docker docker sandbox
   hosts: localhost
