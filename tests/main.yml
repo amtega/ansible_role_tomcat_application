@@ -38,6 +38,7 @@
         timeout: 60
   tags:
     - prepare
+    - idempotence
 
 - name: test tomcat_application role application deploy
   hosts: docker_sandbox_containers
