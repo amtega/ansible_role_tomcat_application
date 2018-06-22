@@ -2,11 +2,29 @@
 # Handlers to restart tomcat instance
 
 - block:
+    - name: restart tomcat instances with operating system associated services
+      service:
+        name: "{{ instance.name }}"
+        state: restarted
+      loop: >-
+        {{ tomcat_application_server_instances
+           | selectattr("service", "equalto", true)
+           | list }}
+      loop_control:
+        loop_var: instance
+        label: "{{ instance.name }}"
+      listen:
+        - shutdown tomcat instance
+        - start tomcat instance
+
     - name: tomcat_application shutdown tomcat instance
       shell: >-
         {{ instance.base }}/{{ tomcat_application_instance_shutdown }} ;
         sleep {{ tomcat_application_instance_restart_pause }}
-      loop: "{{ tomcat_application_server_instances }}"
+      loop:  >-
+        {{ tomcat_application_server_instances
+           | selectattr("service", "equalto", false)
+           | list }}
       loop_control:
         loop_var: instance
         label: "{{ instance.name }}"
@@ -28,7 +46,10 @@
         tomcat_application_start_instance_result.rc != 0
         and not tomcat_application_start_instance_result.stdout
                 is search("Tomcat appears to still be running")
-      loop: "{{ tomcat_application_server_instances }}"
+      loop:  >-
+        {{ tomcat_application_server_instances
+           | selectattr("service", "equalto", false)
+           | list }}
       loop_control:
         loop_var: instance
         label: "{{ instance.name }}"
@@ -36,6 +57,7 @@
       become_user: "{{ instance.user }}"
       become_method: "{{ tomcat_application_instance_restart_become_method }}"
       listen: start tomcat instance
+
   when: >-
     (not instance.autodeploy
      and (tomcat_application_deploy_result.results

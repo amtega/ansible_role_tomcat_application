@@ -23,18 +23,20 @@
                               | first)["matches"][0]["Host"] %}
 {% set process_autodeploy = process_host_config["autoDeploy"] %}
 
-{% set ns = namespace(instance_name=none) %}
+{% set ns = namespace(instance_name=none, service=false) %}
 
 {% for instance in tomcat_application_instances %}
 {% if (ansible_local[instance] is defined
        and ansible_local[instance].base == process_base)
       or (instance == process_base) %}
 {% set ns.instance_name = instance %}
+{% set ns.service = true %}
 {% endif %}
 {% endfor %}
 
 {% if ns.instance_name is not none %}
 - "name": "{{ ns.instance_name }}"
+  "service": {{ ns.service }}
   "base": "{{ process_base }}"
   "home": "{{ process_home }}"
   "user": "{{ process_user }}"
