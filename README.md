@@ -4,7 +4,7 @@ This is an [Ansible](http://www.ansible.com) role that deploys applications in t
 
 ## Requirements
 
-[Ansible 2.5+](http://docs.ansible.com/ansible/latest/intro_installation.html)
+[Ansible 2.6+](http://docs.ansible.com/ansible/latest/intro_installation.html)
 
 ## Role Variables
 
