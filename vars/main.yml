@@ -13,7 +13,7 @@ tomcat_application_supported_distributions:
 tomcat_application_supported_versions:
   centos: 6
   fedora: 27
-  rhel: 7
+  rhel: 6
 
 # Config files paths (relative to tomcat base)
 
