@@ -1,9 +1,12 @@
+---
+# Role dependencies
+
 galaxy_info:
   author: Juan Antonio Valiño García
   description: Deploy applications in tomcat instances
   company: AMTEGA - Xunta de Galicia
   license: GPLv3 or EUPL
-  min_ansible_version: 2.5
+  min_ansible_version: 2.6
   platforms:
   - name: Fedora
     versions:

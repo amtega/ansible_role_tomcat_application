@@ -78,14 +78,6 @@ tomcat_application_autodeply_max_time: 300
 # Proxy settings
 #
 
-# IP address and port, or URL, for using an http_proxy.
-
-#tomcat_application_http_proxy:
-
-# IP address and port, or URL, for using an https_proxy.
-
-#tomcat_application_https_proxy:
-
-# Exclude IP address or URL from the proxy.
-
-#tomcat_application_no_proxy:
+tomcat_application_http_proxy: "{{ ansible_facts.env.http_proxy | default('') }}"
+tomcat_application_https_proxy: "{{ ansible_facts.env.https_proxy | default('') }}"
+tomcat_application_no_proxy: "{{ ansible_facts.env.no_proxy | default('') }}"

@@ -10,7 +10,7 @@
   import_tasks: check.yml
   tags:
     - role::tomcat_application
-    - role::tomtomcat_applicationcat::check
+    - role::tomcat_application::check
 
 - name: setup application directories
   import_tasks: directories.yml
