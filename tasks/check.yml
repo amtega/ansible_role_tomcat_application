@@ -2,6 +2,17 @@
 # Role check tasks
 
 - block:
+    - name: assert platform is supported
+      assert:
+        that:
+          - distribution in tomcat_application_supported_distributions
+          - >-
+            ansible_facts.distribution_version
+            is version(
+              tomcat_application_supported_versions[distribution], ">=")
+      vars:
+        distribution: "{{ ansible_facts.distribution | lower }}"
+
     - name: verify role mandatory variables
       assert:
         that:
