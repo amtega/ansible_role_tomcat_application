@@ -19,7 +19,8 @@
 
     - name: tomcat_application shutdown tomcat instance
       shell: >-
-        {{ instance.base }}/{{ tomcat_application_instance_shutdown }} ;
+        {{ instance.base }}/{{ tomcat_application_instance_shutdown
+                               | default(default_shutdown) }} ;
         sleep {{ tomcat_application_instance_restart_pause }}
       loop:  >-
         {{ tomcat_application_server_instances
@@ -40,7 +41,8 @@
       # valid return state !=0 if the process is running
 
     - name: tomcat_application start tomcat instance
-      shell: "{{ instance.base }}/{{ tomcat_application_instance_startup }}"
+      shell: "{{ instance.base }}/{{ tomcat_application_instance_startup
+                                     | default(default_startup) }}"
       register: tomcat_application_start_instance_result
       failed_when: >-
         tomcat_application_start_instance_result.rc != 0
@@ -73,6 +75,13 @@
        | selectattr("item.0.base", "equalto", instance.base)
        | list
        | length > 0
+  vars:
+    default_startup: >-
+      {{ (instance.jsvc)
+         | ternary("bin/daemon.sh start", "bin/startup.sh") }}
+    default_shutdown: >-
+      {{ (instance.jsvc)
+         | ternary("bin/daemon.sh stop", "bin/shutdown.sh") }}
   tags:
     - role::tomcat_application
     - role::tomcat_application::instance
