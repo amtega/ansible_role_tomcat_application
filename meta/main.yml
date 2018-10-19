@@ -2,6 +2,7 @@
 # Role dependencies
 
 galaxy_info:
+  role_name: tomcat_application
   author: Juan Antonio Valiño García
   description: Deploy applications in tomcat instances
   company: AMTEGA - Xunta de Galicia
