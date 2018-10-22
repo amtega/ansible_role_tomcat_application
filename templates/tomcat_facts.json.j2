@@ -6,6 +6,11 @@
 {% set process_user = fields[0] %}
 {% set process_group = fields[1] %}
 {% set process_command = fields[2] %}
+{% if process_command is search("jsvc.exec") %}
+{% set process_jsvc = true %}
+{% else %}
+{% set process_jsvc = false %}
+{% endif %}
 {% set process_home = process_command.split("-D")
                       | select("match", "catalina.home")
                       | first
@@ -26,8 +31,8 @@
 {% set ns = namespace(instance_name=none, service=false) %}
 
 {% for instance in tomcat_application_instances %}
-{% if (ansible_local[instance] is defined
-       and ansible_local[instance].base == process_base)
+{% if (ansible_local["tomcat" + instance] is defined
+       and ansible_local["tomcat" + instance].base == process_base)
       or (instance == process_base) %}
 {% set ns.instance_name = instance %}
 {% set ns.service = true %}
@@ -42,6 +47,7 @@
   "user": "{{ process_user }}"
   "group": "{{ process_group }}"
   "autodeploy": {{ process_autodeploy }}
+  "jsvc": {{ process_jsvc }}
 {% endif %}
 
 {% endfor %}

@@ -57,10 +57,11 @@ tomcat_application_datasources: []
 
 tomcat_application_artifacts: []
 
-# Tocmat startup and shutdown scripts (relative to instance base)
+# Tocmat startup and shutdown scripts (relative to instance base). By default
+# the role tries to guess the script to use
 
-tomcat_application_instance_startup: bin/startup.sh
-tomcat_application_instance_shutdown: bin/shutdown.sh
+# tomcat_application_instance_startup:
+# tomcat_application_instance_shutdown:
 
 # Number of seconds to wait after shutdown to startup tomcat instance again
 
