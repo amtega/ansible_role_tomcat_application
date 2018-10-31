@@ -20,15 +20,17 @@
   hosts: docker_sandbox_containers
   roles:
     - role: amtega.tomcat
-      tomcat_instances:
-        - name: tomcat@server1
-          version: 8.0.9
-        - name: tomcat@server2
-          version: 8.0.9
-          server_port: 8006
-          server_http_port: 8081
-          server_https_port: 8444
-          server_ajp_port: 8010
+      tomcat_name: tomcat@server1
+      tomcat_version: 8.0.9
+
+    - role: amtega.tomcat
+      tomcat_name: tomcat@server2
+      tomcat_version: 8.0.9
+      tomcat_use_native_daemon: false
+      tomcat_server_port: 8006
+      tomcat_server_http_port: 8081
+      tomcat_server_https_port: 8444
+      tomcat_server_ajp_port: 8010
   tasks:
     - name: download sample application
       get_url:
