@@ -12,7 +12,8 @@ A list of all the default variables for this role is available in `defaults/main
 
 ## Dependencies
 
-[amtega.check_platform](https://galaxy.ansible.com/amtega/check_platform)
+- [amtega.check_platform](https://galaxy.ansible.com/amtega/check_platform)
+- [amtega.artifact](https://galaxy.ansible.com/amtega/artifact)
 
 ## Example Playbook
 
