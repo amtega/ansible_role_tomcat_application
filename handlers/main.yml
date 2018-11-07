@@ -2,7 +2,7 @@
 # Handlers to restart tomcat instance
 
 - block:
-    - name: restart tomcat instances with operating system associated services
+    - name: tomcat_application restart tomcat instances using os services
       service:
         name: "{{ instance.name }}"
         state: restarted
@@ -17,7 +17,7 @@
         - shutdown tomcat instance
         - start tomcat instance
 
-    - name: tomcat_application shutdown tomcat instance
+    - name: tomcat_application shutdown tomcat instance using custom scripts
       shell: >-
         {{ instance.base }}/{{ tomcat_application_instance_shutdown
                                | default(default_shutdown) }} ;
@@ -40,7 +40,7 @@
       # been restart againg by underlying software as systemd. So, we accept as
       # valid return state !=0 if the process is running
 
-    - name: tomcat_application start tomcat instance
+    - name: tomcat_application start tomcat instance using custom scripts
       shell: "{{ instance.base }}/{{ tomcat_application_instance_startup
                                      | default(default_startup) }}"
       register: tomcat_application_start_instance_result

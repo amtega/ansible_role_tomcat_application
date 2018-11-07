@@ -4,10 +4,12 @@
 galaxy_info:
   role_name: tomcat_application
   author: Juan Antonio Valiño García
-  description: Deploy applications in tomcat instances
+  description: >-
+    Deploy applications in tomcat instances configuring also datasources
+    and directories
   company: AMTEGA - Xunta de Galicia
   license: GPLv3 or EUPL
-  min_ansible_version: 2.6
+  min_ansible_version: 2.7
   platforms:
   - name: Fedora
     versions:
@@ -21,5 +23,14 @@ galaxy_info:
     - tomcat
     - jee
     - java
+    - webapps
+    - datasource
 
-dependencies: []
+dependencies:
+  - role: amtega.check_platform
+    check_plaform_distributions:
+      centos: 6
+      fedora: 27
+      rhel: 6
+    check_plaform_variables:
+      - tomcat_application_name

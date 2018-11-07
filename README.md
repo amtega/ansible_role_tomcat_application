@@ -1,10 +1,10 @@
 # Ansible tomcat application role
 
-This is an [Ansible](http://www.ansible.com) role that deploys applications in tomcat server instances.
+This is an [Ansible](http://www.ansible.com) role that deploys applications in tomcat server instances configuring also datasources and directories.
 
 ## Requirements
 
-[Ansible 2.6+](http://docs.ansible.com/ansible/latest/intro_installation.html)
+[Ansible 2.7+](http://docs.ansible.com/ansible/latest/intro_installation.html)
 
 ## Role Variables
 
@@ -12,7 +12,8 @@ A list of all the default variables for this role is available in `defaults/main
 
 ## Dependencies
 
-None.
+- [amtega.check_platform](https://galaxy.ansible.com/amtega/check_platform)
+- [amtega.artifact](https://galaxy.ansible.com/amtega/artifact)
 
 ## Example Playbook
 

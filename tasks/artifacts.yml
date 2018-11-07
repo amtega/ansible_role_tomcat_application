@@ -2,33 +2,67 @@
 # Tasks to setup application artifacts
 
 - block:
-    - name: deploy http/https/file artifacts
-      get_url:
-        url: "{{ item.1.url }}"
-        dest: "{{ item.0.base }}/{{ item.1.dest }}"
-        force: yes
-        url_username: "{{ item.1.username | default(omit) }}"
-        url_password: "{{ item.1.password | default(omit) }}"
-        timeout: "{{ item.1.timeout | default(omit) }}"
-        validate_certs: "{{ item.1.validate_certs | default(omit) }}"
-      environment: "{{ tomcat_application_http_proxy_environment }}"
-      when:
-        - tomcat_application_state == "present"
-        - protocol in ["http", "https", "file"]
-      register: tomcat_application_deploy_result
-      loop: >-
-        {{ query('nested',
-                 tomcat_application_server_instances,
-                 tomcat_application_artifacts) }}
-      loop_control:
-        label: "{{ item.1.url }} {{ item.0.base }}/{{ item.1.dest }}"
-      notify:
-        - shutdown tomcat instance
+    - block:
+        - name: deploy tomcat application artifacts
+          include_role:
+            name: amtega.artifact
+          vars:
+            override:
+              id: >-
+                {{ "tomcat_application_"
+                   + tomcat_application_name
+                   + "_"
+                   + tomcat_application_item.1.id }}
+              dest: >-
+                {{ tomcat_application_item.0.base
+                   + "/"
+                   + tomcat_application_item.1.dest }}
+              owner: "{{ tomcat_application_item.0.user }}"
+              group: "{{ tomcat_application_item.0.group }}"
+            artifact: "{{ tomcat_application_item.1 | combine(override) }}"
+          when: tomcat_application_state == "present"
+          loop: >-
+            {{ query('nested',
+                     tomcat_application_server_instances,
+                     tomcat_application_artifacts) }}
+          loop_control:
+            loop_var: tomcat_application_item
+            label: >-
+              {{ tomcat_application_item.0.base }}
+              {{ tomcat_application_item.1.file }}
+
+        - name: determining if it is necessary to restart the tomcat service
+          command: /bin/true
+          changed_when: artifact_result.changed
+          loop: >-
+            {{ query('nested',
+                     tomcat_application_server_instances,
+                     tomcat_application_artifacts) }}
+          loop_control:
+            loop_var: tomcat_application_item
+            label: >-
+              {{ tomcat_application_item.0.base }}
+              {{ tomcat_application_item.1.file }}
+          notify:
+            - shutdown tomcat instance
+          vars:
+            artifact_result: >-
+              {{ lookup('vars',
+                        'artifact_result_tomcat_application_'
+                        + tomcat_application_name
+                        + '_'
+                        + tomcat_application_item.1.id) }}
+      when: tomcat_application_state == "present"
 
     - block:
-        - name: remove http/https/file artifacts downloadable
+        - name: remove tomcat application artifacts
           file:
-            path: "{{ artifact_downloadable }}"
+            path: >-
+              {{ tomcat_application_item.0.base
+                 +"/"
+                 + tomcat_application_item.1.dest
+                 + "/"
+                 + tomcat_application_item.1.file }}
             state: absent
           register: tomcat_application_undeploy_artifacts_result
           loop: >-
@@ -36,47 +70,37 @@
                      tomcat_application_server_instances,
                      tomcat_application_artifacts) }}
           loop_control:
-            label: "{{ artifact_downloadable }}"
+            loop_var: tomcat_application_item
+            label: >-
+              {{ tomcat_application_item.0.base }}
+              {{ tomcat_application_item.1.file }}
           notify:
             - shutdown tomcat instance
 
-        - name: remove http/https/file artifacts deployed directories
+        - name: remove tomcat application deployed directories
           file:
-            path: "{{ artifact_deployed_dir }}"
+            path: >-
+              {{ tomcat_application_item.0.base
+                 + "/"
+                 + tomcat_application_item.1.dest
+                 + "/"
+                 + (tomcat_application_item.1.file | splitext).0 }}
             state: absent
           register: tomcat_application_undeploy_artifacts_dirs_result
           loop: >-
             {{ query('nested',
                      tomcat_application_server_instances,
-                     tomcat_application_artifacts) }}
+                     tomcat_application_artifacts
+                     | selectattr("file", "search", "\.war$")
+                     | list) }}
           loop_control:
-            label: "{{ artifact_deployed_dir }}"
+            loop_var: tomcat_application_item
+            label: >-
+              {{ tomcat_application_item.0.base }}
+              (tomcat_application_item.1.file | splitext).0
           notify:
             - shutdown tomcat instance
-      when:
-        - tomcat_application_state == "absent"
-        - protocol in ["http", "https", "file"]
-  vars:
-    protocol: "{{ item.1.url | regex_replace('(.*)://.*', '\\1') }}"
-    artifact_url_file: "{{ item.1.url | urlsplit('path') | basename }}"
-    artifact_downloadable: >-
-      {{ (item.1.dest is search("\.war$"))
-         | ternary(item.0.base
-                   + "/"
-                   + item.1.dest,
-                   item.0.base
-                   + "/"
-                   + item.1.dest
-                   + "/"
-                   + artifact_url_file) }}
-    artifact_deployed_dir: >-
-      {{ (item.1.dest is search("\.war$"))
-         | ternary(item.0.base + "/" + (item.1.dest | splitext).0,
-                   item.0.base
-                   + "/"
-                   + item.1.dest
-                   + "/"
-                   + (artifact_url_file | splitext).0) }}
+      when: tomcat_application_state == "absent"
   tags:
     - role::tomcat_application
     - role::tomcat_application::artifacts

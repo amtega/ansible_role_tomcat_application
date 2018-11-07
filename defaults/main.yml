@@ -37,23 +37,26 @@ tomcat_application_dirs_remove: false
 
 tomcat_application_datasources: []
 
-# List of application artifacts to deploy. The dicts must have the
-# following structure:
+# List of application artifacts to deploy. Take a look to `amtega.artifact` role
+# documentation to known about supported types of artifacts, their specific
+# settings and how to configure a proxy if necessary.
 #
-# { url: https://ascme.com/sample.war # Url to the artifact downloadable.
-#                                     # Se below for details.
-#   dest: webapps                     # Where to deposit the artifact.
-#                                     # The path is relative to tomcat base
-#   username: acme                    # User name for basic http authentication
-#   password: acme                    # Password for basic http authentication
-#   timeout: 60                       # Timeout for downloads
-#   validate_certs: true              # Validate SSL certificates }
+# The artifact attributes `owner` and `group` will be overriden to match tomcat
+# instance user and group
 #
-# These are the supported artifact's url protocols:
+# The artifact attribute `dest` is relative to the tomcat instance base
 #
-# - http: for http downloadable artifact
-# - https: for https downloadable artifact
-# - file: for a file stored localy on the tomcat machine
+# Sample:
+#
+# tomcat_application_artifacts:
+#   - id: sample_war
+#     type: https
+#     host: https://tomcat.apache.org
+#     path: tomcat-8.0-doc/appdev/sample
+#     file: sample.war
+#     dest: webapps
+#     timeout: 120
+#     validate_certs: yes
 
 tomcat_application_artifacts: []
 
@@ -74,11 +77,3 @@ tomcat_application_instance_restart_become_method: su
 # Max time given to the tomcat autodeploy process to complete the task
 
 tomcat_application_autodeply_max_time: 300
-
-#
-# Proxy settings
-#
-
-tomcat_application_http_proxy: "{{ ansible_facts.env.http_proxy | default('') }}"
-tomcat_application_https_proxy: "{{ ansible_facts.env.https_proxy | default('') }}"
-tomcat_application_no_proxy: "{{ ansible_facts.env.no_proxy | default('') }}"
