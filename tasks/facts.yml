@@ -5,7 +5,7 @@
     - name: search tomcat raw server instances processes
       shell: >-
         ps axo "%u,%g,%a"
-        | grep org.apache.catalina.startup.Bootstrap
+        | grep {{ tomcat_application_server_main_class }}
         | grep -v grep
       register: tomcat_application_search_instances_result
       changed_when: false
