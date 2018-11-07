@@ -31,8 +31,8 @@
 {% set ns = namespace(instance_name=none, service=false) %}
 
 {% for instance in tomcat_application_instances %}
-{% if (ansible_local["tomcat" + instance] is defined
-       and ansible_local["tomcat" + instance].base == process_base)
+{% if (ansible_local["tomcat_" + instance] is defined
+       and ansible_local["tomcat_" + instance].base == process_base)
       or (instance == process_base) %}
 {% set ns.instance_name = instance %}
 {% set ns.service = true %}
