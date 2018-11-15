@@ -5,6 +5,7 @@
   include_tasks: facts.yml
   tags:
     - role::tomcat_application
+    - role::tomcat_application::facts
 
 - name: sanity checks
   include_tasks: check.yml
