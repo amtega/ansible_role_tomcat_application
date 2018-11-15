@@ -2,7 +2,7 @@
 {% for ds in tomcat_application_datasources %}
 - base: "{{ instance.base }}"
   name: "{{ ds.name }}"
-  attributes_names: {{ ds.keys() | reject('equalto', 'name') | list | to_yaml }}
-  attributes_values: {{ ds | to_yaml }}
+  attributes_names: {{ ds.keys() | reject('equalto', 'name') | list | to_json }}
+  attributes_values: {{ ds | to_json }}
 {% endfor %}
 {% endfor %}
