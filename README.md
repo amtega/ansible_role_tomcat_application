@@ -1,4 +1,4 @@
-# Ansible tomcat application role
+# Ansible tomcat_application role
 
 This is an [Ansible](http://www.ansible.com) role that deploys applications in tomcat server instances configuring also datasources and directories.
 

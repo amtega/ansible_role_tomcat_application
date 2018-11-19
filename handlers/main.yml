@@ -22,6 +22,10 @@
         {{ instance.base }}/{{ tomcat_application_instance_shutdown
                                | default(default_shutdown) }} ;
         sleep {{ tomcat_application_instance_restart_pause }}
+      when:
+        - tomcat_application_instance_shutdown is defined
+        - tomcat_application_instance_shutdown is not none
+        - tomcat_application_instance_shutdown | length > 0
       loop:  >-
         {{ tomcat_application_server_instances
            | selectattr("service", "equalto", false)
@@ -48,6 +52,10 @@
         tomcat_application_start_instance_result.rc != 0
         and not tomcat_application_start_instance_result.stdout
                 is search("Tomcat appears to still be running")
+      when:
+        - tomcat_application_instance_startup is defined
+        - tomcat_application_instance_startup is not none
+        - tomcat_application_instance_startup | length > 0
       loop:  >-
         {{ tomcat_application_server_instances
            | selectattr("service", "equalto", false)

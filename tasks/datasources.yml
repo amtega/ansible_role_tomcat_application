@@ -54,4 +54,4 @@
         - shutdown tomcat instance
   tags:
     - role::tomcat_application
-    - role::tomcat_application::dirs
+    - role::tomcat_application::datasources
