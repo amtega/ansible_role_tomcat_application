@@ -47,11 +47,10 @@
             - shutdown tomcat instance
           vars:
             artifact_result: >-
-              {{ lookup('vars',
-                        'artifact_result_tomcat_application_'
-                        + tomcat_application_name
-                        + '_'
-                        + tomcat_application_item.1.id) }}
+              {{ artifact_result["tomcat_application_"
+                                 + tomcat_application_name
+                                 + "_"
+                                 + tomcat_application_item.1.id] }}
       when: tomcat_application_state == "present"
 
     - block:
