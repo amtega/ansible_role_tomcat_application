@@ -13,7 +13,7 @@
 
         - name: determining if it is necessary to restart the tomcat service
           command: /bin/true
-          changed_when: artifact_result.changed
+          changed_when: artifact_result_item.changed
           loop: >-
             {{ query('nested',
                      tomcat_application_server_instances,
@@ -26,7 +26,7 @@
           notify:
             - shutdown tomcat instance
           vars:
-            artifact_result: >-
+            artifact_result_item: >-
               {{ artifact_result["tomcat_application_"
                                  + tomcat_application_name
                                  + "_"
