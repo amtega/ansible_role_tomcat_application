@@ -1,7 +1,7 @@
 {% set ns = namespace(found=false) %}
 {% for instance in tomcat_application_server_instances %}
 {% for artifact in tomcat_application_artifacts %}
-{% set override = {"id": "tomcat_application_" + tomcat_application_name + "_" + id,
+{% set override = {"id": "tomcat_application_" + tomcat_application_name + "_" + artifact.id,
                    "dest": "%(base)/%(dest)" | format(base=instance.base, dest=artifact.dest),
                    "owner": instance.user,
                    "group": instance.group } %}
