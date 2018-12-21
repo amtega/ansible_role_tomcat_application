@@ -7,33 +7,13 @@
           include_role:
             name: amtega.artifact
           vars:
-            override:
-              id: >-
-                {{ "tomcat_application_"
-                   + tomcat_application_name
-                   + "_"
-                   + tomcat_application_item.1.id }}
-              dest: >-
-                {{ tomcat_application_item.0.base
-                   + "/"
-                   + tomcat_application_item.1.dest }}
-              owner: "{{ tomcat_application_item.0.user }}"
-              group: "{{ tomcat_application_item.0.group }}"
-            artifact: "{{ tomcat_application_item.1 | combine(override) }}"
+            artifact_list: >-
+              {{ lookup('template', 'artifacts.yml.j2') | from_yaml }}
           when: tomcat_application_state == "present"
-          loop: >-
-            {{ query('nested',
-                     tomcat_application_server_instances,
-                     tomcat_application_artifacts) }}
-          loop_control:
-            loop_var: tomcat_application_item
-            label: >-
-              {{ tomcat_application_item.0.base }}
-              {{ tomcat_application_item.1.file }}
 
         - name: determining if it is necessary to restart the tomcat service
           command: /bin/true
-          changed_when: artifact_result.changed
+          changed_when: artifact_result_item.changed
           loop: >-
             {{ query('nested',
                      tomcat_application_server_instances,
@@ -46,12 +26,11 @@
           notify:
             - shutdown tomcat instance
           vars:
-            artifact_result: >-
-              {{ lookup('vars',
-                        'artifact_result_tomcat_application_'
-                        + tomcat_application_name
-                        + '_'
-                        + tomcat_application_item.1.id) }}
+            artifact_result_item: >-
+              {{ artifact_result["tomcat_application_"
+                                 + tomcat_application_name
+                                 + "_"
+                                 + tomcat_application_item.1.id] }}
       when: tomcat_application_state == "present"
 
     - block:

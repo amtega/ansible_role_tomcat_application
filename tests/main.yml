@@ -181,6 +181,9 @@
       failed_when: >-
          not check_application_result.content
              is search("Sample.*Hello.*World.*Application")
+      until: check_application_result is success
+      retries: 5
+      delay: 5
       loop:
         - http://localhost:8080/sample
         - http://localhost:8080/sample2
@@ -326,10 +329,11 @@
         - http://localhost:8081/sample
         - http://localhost:8081/sample2
 
-# - name: cleanup docker sandbox
-#   hosts: localhost
-#   roles:
-#     - role: amtega.docker_sandbox
-#       docker_sandbox_state: absent
-#   tags:
-#     - sandbox
+- name: cleanup docker sandbox
+  hosts: localhost
+  roles:
+    - role: amtega.docker_sandbox
+      docker_sandbox_state: absent
+  tags:
+    - cleanup
+    - sandbox
