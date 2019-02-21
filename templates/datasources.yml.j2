@@ -1,8 +1,20 @@
-{% for instance in tomcat_application_server_instances %}
-{% for ds in tomcat_application_datasources %}
-- base: "{{ instance.base }}"
-  name: "{{ ds.name }}"
-  attributes_names: {{ ds.keys() | reject('equalto', 'name') | list | to_json }}
-  attributes_values: {{ ds | to_json }}
-{% endfor %}
+{%- for instance in tomcat_application_server_instances -%}
+
+    {%- for tomcat_application_datasource in tomcat_application_datasources -%}
+
+        {%- if tomcat_application_datasource.template is defined -%}
+            {%- set tomcat_application_datasource_index = loop.index -%}
+            {%- set tomcat_application_datasource_template = lookup("vars", tomcat_application_datasource.template) -%}
+            {%- set ds = tomcat_application_datasource_template | combine(tomcat_application_datasource) -%}
+        {%- else -%}
+            {%- set ds = tomcat_application_datasource -%}
+        {%- endif -%}
+
+{#- -#} - base: "{{ instance.base }}"
+{#- -#}   name: "{{ ds.name }}"
+{#- -#}   attributes_names: {{ ds.keys() | reject('equalto', 'name') | list | to_json }}
+{#- -#}   attributes_values: {{ ds | to_json }}{{ "\n" }}
+
+    {% endfor %}
+
 {% endfor %}
