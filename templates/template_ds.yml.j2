@@ -1,0 +1,10 @@
+{%- for tomcat_application_datasource in tomcat_application_datasources -%}
+
+    {%- if tomcat_application_datasource.template is defined -%}
+        {%- set tomcat_application_datasource_template = lookup("vars", tomcat_application_datasource.template) -%}
+        {%- set ds = tomcat_application_datasource_template | combine(tomcat_application_datasource) -%}
+    {%- else -%}
+        {%- set ds = tomcat_application_datasource -%}
+    {%- endif -%}
+- {{ ds | to_json }}{{ "\n" }}
+{% endfor %}

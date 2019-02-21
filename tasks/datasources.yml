@@ -5,12 +5,15 @@
     - name: apply templates to data sources
       set_fact:
         tomcat_application_datasources_templated: >-
-          {{ lookup("template", "template_ds.yml" )}}
-      loop: "{{ tomcat_application_datasources }}}"
+          {{ tomcat_application_datasources_templated | default([])
+             + lookup("template", "template_ds.yml.j2") | from_yaml }}
+      loop: "{{ tomcat_application_datasources }}"
       loop_control:
         loop_var: tomcat_application_datasource
         index_var: tomcat_application_datasource_index
         label: "{{ tomcat_application_datasource_index }}"
+
+    - debug: var=tomcat_application_datasources_templated
 
     - fail:
 
