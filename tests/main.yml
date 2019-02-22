@@ -59,7 +59,7 @@
       factory: org.apache.tomcat.jdbc.pool.DataSourceFactory
       type: javax.sql.DataSource
       driverClassName: com.mysql.jdbc.Driver
-      # url: "jdbc:mysql://{{ tomcat_application_datasource.server }}"
+      url: "jdbc:mysql://{{ tomcat_application_datasource._server }}"
       testWhileIdle: "false"
       testOnBorrow: "true"
       testOnReturn: "false"
@@ -109,10 +109,9 @@
       - "resource/{{ tomcat_application_name }}"
     tomcat_application_datasources:
       - template: mysql_datasource_template
-        server: mysql.acme.com
         user: app
         password: app_password
-
+        _server: mysql.acme.com
       - name: "jdbc/{{ tomcat_application_name }}DS02"
         auth: Container
         type: acme.jdbc.pool.AcmeDataSource
@@ -168,7 +167,7 @@
       loop: >-
         {{ query('nested',
                  tomcat_application_server_instances,
-                 tomcat_application_datasources) }}
+                 tomcat_application_datasources_templated) }}
       loop_control:
         label: "{{ item.0.name }} {{ item.1.name }}"
 
@@ -260,7 +259,6 @@
           url: dbc:acme:@DATABASE
           user: app
           password: app_password
-
         - name: "jdbc/{{ tomcat_application_name }}DS02"
           auth: Container
           type: acme.jdbc.pool.AcmeDataSource
@@ -306,7 +304,7 @@
       loop: >-
         {{ query('nested',
                  tomcat_application_server_instances,
-                 tomcat_application_datasources) }}
+                 tomcat_application_datasources_templated) }}
       loop_control:
         label: "{{ item.0.name }} {{ item.1.name }}"
 

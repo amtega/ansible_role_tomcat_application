@@ -1,3 +1,4 @@
+{% set global_ns = namespace(found=false) %}
 {% for process in tomcat_application_search_instances_result.stdout_lines
                   | default([]) %}
 {% set fields = process.split(",")
@@ -40,6 +41,7 @@
 {% endfor %}
 
 {% if ns.instance_name is not none %}
+{% set global_ns.found = true %}
 - "name": "{{ ns.instance_name }}"
   "service": {{ ns.service }}
   "base": "{{ process_base }}"
@@ -51,3 +53,7 @@
 {% endif %}
 
 {% endfor %}
+
+{% if not global_ns.found %}
+[]
+{% endif %}
