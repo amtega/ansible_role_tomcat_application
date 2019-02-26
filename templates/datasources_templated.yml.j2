@@ -1,0 +1,14 @@
+{%- if tomcat_application_datasource.template is defined -%}
+    {%- set tomcat_application_datasource_template = lookup("vars", tomcat_application_datasource.template) -%}
+    {%- set ds = tomcat_application_datasource_template | combine(tomcat_application_datasource) -%}
+{%- else -%}
+    {%- set ds = tomcat_application_datasource -%}
+{%- endif -%}
+
+{%- set ns = namespace(ds={}) -%}
+{%- for k in ds.keys() | list -%}
+    {%- if not k is search("_.*") -%}
+        {%- set ns.ds = ns.ds | combine({ k: ds[k] }) -%}
+    {%- endif -%}
+{%- endfor -%}
+- {{ ns.ds | to_json }}{{ "\n" }}

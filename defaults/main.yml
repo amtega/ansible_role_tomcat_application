@@ -33,7 +33,44 @@ tomcat_application_dirs_remove: false
 #   driverClassName: acme.jdbc.AcmeDriver     # Driver class
 #   url: dbc:acme:oci:@DATABASE               # Url
 #   user: app                                 # User
-#   password: app_password                    # Password }
+#   password: app_password                    # Password
+#   template: my_datasource_template          # Tempalte to apply (see below) }
+#
+#
+# To avoid copy & paste when using similar datasources, you can setup a variable
+# containing the common part of the datasources and the put the name of this
+# variable in the datasource `template` attribute
+#
+# In the template you can refer to the datasource number being expanded using the variables
+# `tomcat_application_datasource_index0` (starts with 0) and
+# `tomcat_application_datasource_index1` (starts with 1)
+#
+# Also, in the template you can use the variable `tomcat_application_datasource`
+# to refer the concrete datasource being expanded. During the expansion the
+# datasource attributes starting with `_` will not be included in the final
+# config. Sample:
+#
+# my_template:
+#   name: >-
+#     {{ "jdbc/"
+#        + tomcat_application_name
+#        + tomcat_application_datasource_index | string }}
+#   auth: Container
+#   factory: org.apache.tomcat.jdbc.pool.DataSourceFactory
+#   type: javax.sql.DataSource
+#   driverClassName: com.mysql.jdbc.Driver
+#   url: "jdbc:mysql://{{ tomcat_application_datasource._server }}"
+#   minIdle: 0
+#   maxIdle: 30
+#   initialSize: 5
+#   maxActive: 100
+#   maxWait: 10000
+#
+# tomcat_application_datasources:
+#   - template: my_template
+#     user: app
+#     password: app_password
+#     _server: mysql.acme.com
 
 tomcat_application_datasources: []
 

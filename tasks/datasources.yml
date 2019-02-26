@@ -2,6 +2,22 @@
 # Tasks to setup application dirs
 
 - block:
+    - name: setup fact with templated to data sources
+      set_fact:
+        tomcat_application_datasources_templated: >-
+          {{ tomcat_application_datasources_templated | default([])
+             + lookup("template", "datasources_templated.yml.j2") | from_yaml }}
+      loop: "{{ tomcat_application_datasources }}"
+      loop_control:
+        loop_var: tomcat_application_datasource
+        index_var: tomcat_application_datasource_index
+        label: "{{ tomcat_application_datasource_index }}"
+      vars:
+        tomcat_application_datasource_index0: >-
+          {{ tomcat_application_datasource_index }}
+        tomcat_application_datasource_index1: >-
+          {{ tomcat_application_datasource_index + 1}}
+
     - name: setup application datasources attributes
       xml:
         path: "{{ ds_path }}"
@@ -47,7 +63,7 @@
       loop: >-
         {{ query('nested',
                  tomcat_application_server_instances,
-                 tomcat_application_datasources) }}
+                 tomcat_application_datasources_templated) }}
       loop_control:
         label: "{{ item.1.name }}"
       notify:

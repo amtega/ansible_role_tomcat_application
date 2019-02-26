@@ -1,8 +1,14 @@
+{% set ns = namespace(found=false) %}
 {% for instance in tomcat_application_server_instances %}
-{% for ds in tomcat_application_datasources %}
+{% for ds in tomcat_application_datasources_templated %}
+{% set ns.found = true %}
 - base: "{{ instance.base }}"
   name: "{{ ds.name }}"
-  attributes_names: {{ ds.keys() | reject('equalto', 'name') | list | to_json }}
+  attributes_names: {{ ds.keys() | list | reject('equalto', 'name') | list | to_json }}
   attributes_values: {{ ds | to_json }}
 {% endfor %}
 {% endfor %}
+
+{% if not ns.found %}
+[]
+{% endif %}
