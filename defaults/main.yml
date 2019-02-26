@@ -41,8 +41,8 @@ tomcat_application_dirs_remove: false
 # containing the common part of the datasources and the put the name of this
 # variable in the datasource `template` attribute
 #
-# In the template you can refer to the datasource number being expanded using the variables
-# `tomcat_application_datasource_index0` (starts with 0) and
+# In the template you can refer to the datasource number being expanded using
+# the variables `tomcat_application_datasource_index0` (starts with 0) and
 # `tomcat_application_datasource_index1` (starts with 1)
 #
 # Also, in the template you can use the variable `tomcat_application_datasource`
