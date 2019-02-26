@@ -16,7 +16,7 @@
         tomcat_application_datasource_index0: >-
           {{ tomcat_application_datasource_index }}
         tomcat_application_datasource_index1: >-
-          {{ tomcat_application_datasource_index + 1}}
+          {{ tomcat_application_datasource_index + 1 }}
 
     - name: setup application datasources attributes
       xml:

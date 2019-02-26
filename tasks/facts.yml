@@ -7,6 +7,8 @@
         ps axo "%u,%g,%a"
         | grep {{ tomcat_application_server_main_class }}
         | grep -v grep
+      args:
+        warn: no
       register: tomcat_application_search_instances_result
       changed_when: false
       failed_when: false
