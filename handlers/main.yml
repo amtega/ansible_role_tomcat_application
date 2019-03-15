@@ -71,21 +71,42 @@
       listen: start tomcat instance
 
   when: >-
-    (not instance.autodeploy
-     and (tomcat_application_deploy_result.results
-          + tomcat_application_undeploy_artifacts_result.results
-          + tomcat_application_undeploy_artifacts_dirs_result.results)
-         | select('changed')
-         | selectattr("item.0.base", "equalto", instance.base)
-         | list
-         | length > 0)
-    or (tomcat_application_setup_ds_result.results
-        + tomcat_application_remove_ds_result.results)
-       | select('changed')
-       | selectattr("item.0.base", "equalto", instance.base)
-       | list
-       | length > 0
+    (not instance.autodeploy and (artifacts_changed or undeploy_changed))
+    or ds_setup_changed
   vars:
+    artifacts_changed: >-
+      {{ (artifact_result | default({})).values()
+         | selectattr("changed", "defined")
+         | selectattr("changed", "equalto", True)
+         | list
+         | length > 0 }}
+
+    undeploy_changed: >-
+      {{ ((tomcat_application_undeploy_artifacts_result
+           | default({"results": []})).results
+          + (tomcat_application_undeploy_artifacts_dirs_result
+             | default({"results": []})).results)
+         | selectattr("changed", "defined")
+         | select("changed")
+         | selectattr("tomcat_application_item.0.base",
+                      "equalto",
+                      instance.base)
+         | list
+         | length > 0 }}
+
+    ds_setup_changed: >-
+      {{ ((tomcat_application_setup_ds_result
+           | default({"results": []})).results
+          + (tomcat_application_remove_ds_result
+             | default({'results': []})).results)
+         | selectattr("changed", "defined")
+         | select("changed")
+         | selectattr("tomcat_application_item.0.base",
+                      "equalto",
+                      instance.base)
+         | list
+         | length > 0 }}
+
     default_startup: >-
       {{ (instance.jsvc)
          | ternary("bin/daemon.sh start", "bin/startup.sh") }}

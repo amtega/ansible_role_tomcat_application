@@ -12,7 +12,8 @@ A list of all the default variables for this role is available in `defaults/main
 
 - tomcat_application_server_instances: list of dicts with tomcat instances info. Each dict contains the following info: `name`, `service`, `base`, `home`, `user`, `group`, `autodeploy` and `jsvc`.
 
-- tomcat_application_datasources_templated: application datasources after template application.
+- `tomcat_application_datasources_deployed`: application datasources deployed.
+- `tomcat_artifacts_deployed`: application datasources deployed
 
 ## Dependencies
 

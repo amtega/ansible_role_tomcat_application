@@ -3,12 +3,16 @@
 
 - block:
     - block:
+        - name: setup fact with application artifacts
+          set_fact:
+            tomcat_artifacts_deployed: >-
+              {{ lookup('template', 'artifacts.yml.j2') | from_yaml }}
+
         - name: deploy tomcat application artifacts
           include_role:
             name: amtega.artifact
           vars:
-            artifact_list: >-
-              {{ lookup('template', 'artifacts.yml.j2') | from_yaml }}
+            artifact_list: "{{ tomcat_artifacts_deployed }}"
           when: tomcat_application_state == "present"
 
         - name: determining if it is necessary to restart the tomcat service

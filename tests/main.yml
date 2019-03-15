@@ -169,7 +169,7 @@
       loop: >-
         {{ query('nested',
                  tomcat_application_server_instances,
-                 tomcat_application_datasources_templated) }}
+                 tomcat_application_datasources_deployed) }}
       loop_control:
         label: "{{ item.0.name }} {{ item.1.name }}"
 
@@ -306,7 +306,7 @@
       loop: >-
         {{ query('nested',
                  tomcat_application_server_instances,
-                 tomcat_application_datasources_templated) }}
+                 tomcat_application_datasources_deployed) }}
       loop_control:
         label: "{{ item.0.name }} {{ item.1.name }}"
 

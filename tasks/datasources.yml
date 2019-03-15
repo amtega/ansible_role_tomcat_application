@@ -4,8 +4,8 @@
 - block:
     - name: setup fact with templated to data sources
       set_fact:
-        tomcat_application_datasources_templated: >-
-          {{ tomcat_application_datasources_templated | default([])
+        tomcat_application_datasources_deployed: >-
+          {{ tomcat_application_datasources_deployed | default([])
              + lookup("template", "datasources_templated.yml.j2") | from_yaml }}
       loop: "{{ tomcat_application_datasources }}"
       loop_control:
@@ -42,20 +42,34 @@
                  lookup('template', 'datasources.yml.j2') | from_yaml,
                  'attributes_names') }}
       loop_control:
-        label: "{{ ds_path }} {{ item.0.name }} {{ item.1 }}"
+        loop_var: tomcat_application_item
+        label: >-
+          {{ ds_path }}
+          {{ tomcat_application_item.0.name }}
+          {{ tomcat_application_item.1 }}
       notify:
         - shutdown tomcat instance
       vars:
-        ds_path: "{{ item.0.base }}/{{ tomcat_application_context_config }}"
-        ds_xpath_base: "/Context/Resource[@name='{{ item.0.name }}']"
-        ds_attribute: "{{ item.1 }}"
-        ds_attribute_value: "{{ item.0.attributes_values[item.1] }}"
+        ds_path: >-
+          {{ tomcat_application_item.0.base
+             + "/"
+             + tomcat_application_context_config }}
+        ds_xpath_base: >-
+          /Context/Resource[@name='{{ tomcat_application_item.0.name }}']
+        ds_attribute: "{{ tomcat_application_item.1 }}"
+        ds_attribute_all_values: >-
+          {{ tomcat_application_item.0.attributes_values }}
+        ds_attribute_value: >-
+          {{ ds_attribute_all_values[tomcat_application_item.1] }}
         ds_attribute_to_remove: "{{ ds_attribute_value is none }}"
 
     - name: remove application datasources
       xml:
-        path: "{{ item.0.base }}/{{ tomcat_application_context_config }}"
-        xpath: "/Context/Resource[@name='{{ item.1.name }}']"
+        path: >-
+          {{ tomcat_application_item.0.base
+             + "/"
+             + tomcat_application_context_config }}
+        xpath: "/Context/Resource[@name='{{ tomcat_application_item.1.name }}']"
         state: absent
         pretty_print: true
       when: tomcat_application_state == "absent"
@@ -63,9 +77,10 @@
       loop: >-
         {{ query('nested',
                  tomcat_application_server_instances,
-                 tomcat_application_datasources_templated) }}
+                 tomcat_application_datasources_deployed) }}
       loop_control:
-        label: "{{ item.1.name }}"
+        loop_var: tomcat_application_item
+        label: "{{ tomcat_application_item.1.name }}"
       notify:
         - shutdown tomcat instance
   tags:
