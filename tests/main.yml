@@ -125,6 +125,13 @@
         url: dbc:acme:@DATABASE
         user: app
         password: app_password
+    # tomcat_application_managers:
+    #   - instance: tomcat@server1
+    #     url: http://localhost:8080
+    #     user: admin
+    #     password: admin
+    #     timeout: 5
+    #     retries: 5
   tasks:
     - meta: flush_handlers
 
