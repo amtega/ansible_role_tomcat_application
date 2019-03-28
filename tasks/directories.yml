@@ -2,7 +2,7 @@
 # Tasks to setup application dirs
 
 - block:
-    - name: setup application directories
+    - name: Setup application directories
       file:
         path: >-
           {{ tomcat_application_item.0.base }}/{{ tomcat_application_item.1 }}
@@ -20,7 +20,7 @@
         label: >-
           {{ tomcat_application_item.0.base }}/{{ tomcat_application_item.1 }}
 
-    - name: remove application directories
+    - name: Remove application directories
       file:
         path: >-
           {{ tomcat_application_item.0.base }}/{{ tomcat_application_item.1 }}

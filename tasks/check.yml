@@ -2,7 +2,7 @@
 # Role check tasks
 
 - block:
-    - name: verify tomcat server instances
+    - name: Verify tomcat server instances
       assert:
         that:
           - tomcat_application_instance in server_instances_names

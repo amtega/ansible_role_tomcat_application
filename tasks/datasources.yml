@@ -2,7 +2,7 @@
 # Tasks to setup application dirs
 
 - block:
-    - name: setup fact with templated to data sources
+    - name: Setup fact with templated to data sources
       set_fact:
         tomcat_application_datasources_deployed: >-
           {{ tomcat_application_datasources_deployed | default([])
@@ -18,7 +18,7 @@
         tomcat_application_datasource_index1: >-
           {{ tomcat_application_datasource_index + 1 }}
 
-    - name: setup application datasources attributes
+    - name: Setup application datasources attributes
       xml:
         path: "{{ ds_path }}"
         xpath: >-
@@ -63,7 +63,7 @@
           {{ ds_attribute_all_values[tomcat_application_item.1] }}
         ds_attribute_to_remove: "{{ ds_attribute_value is none }}"
 
-    - name: remove application datasources
+    - name: Remove application datasources
       xml:
         path: >-
           {{ tomcat_application_item.0.base

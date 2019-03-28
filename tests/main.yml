@@ -1,7 +1,7 @@
 ---
 # Tasks for testing role
 
-- name: run idempotence test
+- name: Run idempotence test
   hosts: localhost
   roles:
     - role: amtega.docker_presets
@@ -16,7 +16,7 @@
   tags:
     - sandbox
 
-- name: prepare docker containers for test
+- name: Prepare docker containers for test
   hosts: docker_sandbox_containers
   roles:
     - role: amtega.tomcat
@@ -34,7 +34,7 @@
       tomcat_server_https_port: 8444
       tomcat_server_ajp_port: 8010
   tasks:
-    - name: download sample application
+    - name: Download sample application
       get_url:
         url: https://tomcat.apache.org/tomcat-8.0-doc/appdev/sample/sample.war
         dest: /tmp/sample2.war
@@ -44,7 +44,7 @@
     - prepare
     - idempotence
 
-- name: test tomcat_application role application deploy
+- name: Test tomcat_application role application deploy
   hosts: docker_sandbox_containers
   roles:
     - role: amtega.tomcat_application
@@ -128,7 +128,7 @@
   tasks:
     - meta: flush_handlers
 
-    - name: search application dirs
+    - name: Search application dirs
       stat:
         path: "{{ item.0.base }}/{{ item.1 }}"
       loop: >-
@@ -139,7 +139,7 @@
       loop_control:
         label: "{{ item.0.base }}/{{ item.1 }}"
 
-    - name: check application dirs exist
+    - name: Check application dirs exist
       assert:
         that: item
       loop: >-
@@ -147,7 +147,7 @@
            | map(attribute='stat.exists')
            | list }}
 
-    - name: check datasources config
+    - name: Check datasources config
       xml:
         path: "{{ item.0.base }}/conf/context.xml"
         xpath: "/Context/Resource[@name='{{ item.1.name }}']"
@@ -173,7 +173,7 @@
       loop_control:
         label: "{{ item.0.name }} {{ item.1.name }}"
 
-    - name: search application artifacts
+    - name: Search application artifacts
       stat:
         path: "{{ item }}"
       loop:
@@ -183,7 +183,7 @@
         - /srv/tomcat/tomcat@server2/webapps/sample2.war
       register: check_artifacts_result
 
-    - name: check application artifacts exist
+    - name: Check application artifacts exist
       assert:
         that: item
       loop: >-
@@ -191,7 +191,7 @@
            | map(attribute='stat.exists')
            | list }}
 
-    - name: check application is working
+    - name: Check application is working
       uri:
         url: "{{ item }}"
         return_content: yes
@@ -210,7 +210,7 @@
   tags:
     - idempotence
 
-- name: test tomcat_application role application undeploy
+- name: Test tomcat_application role application undeploy
   hosts: docker_sandbox_containers
   roles:
     - role: amtega.tomcat_application
@@ -277,7 +277,7 @@
   tasks:
     - meta: flush_handlers
 
-    - name: search application dirs
+    - name: Search application dirs
       stat:
         path: "{{ item.0.base }}/{{ item.1 }}"
       loop: >-
@@ -288,7 +288,7 @@
       loop_control:
         label: "{{ item.0.base }}/{{ item.1 }}"
 
-    - name: check application dirs does not exist
+    - name: Check application dirs does not exist
       assert:
         that: not item
       loop: >-
@@ -296,7 +296,7 @@
            | map(attribute='stat.exists')
            | list }}
 
-    - name: check datasources config
+    - name: Check datasources config
       xml:
         path: "{{ item.0.base }}/conf/context.xml"
         xpath: "/Context/Resource[@name='{{ item.1.name }}']"
@@ -310,7 +310,7 @@
       loop_control:
         label: "{{ item.0.name }} {{ item.1.name }}"
 
-    - name: search application artifacts
+    - name: Search application artifacts
       stat:
         path: "{{ item }}"
       loop:
@@ -324,7 +324,7 @@
         - /srv/tomcat/tomcat@server2/webapps/sample2
       register: check_application_artifacts_result
 
-    - name: check application artifacts does not exist
+    - name: Check application artifacts does not exist
       assert:
         that: not item
       loop: >-
@@ -332,7 +332,7 @@
            | map(attribute='stat.exists')
            | list }}
 
-    - name: check application is not working
+    - name: Check application is not working
       uri:
         url: "{{ item }}"
         return_content: yes
@@ -346,7 +346,7 @@
         - http://localhost:8081/sample
         - http://localhost:8081/sample2
 
-- name: cleanup docker sandbox
+- name: Cleanup docker sandbox
   hosts: localhost
   roles:
     - role: amtega.docker_sandbox

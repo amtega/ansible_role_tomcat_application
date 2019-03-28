@@ -2,7 +2,7 @@
 # Role verify tasks
 
 - block:
-    - name: verify that application was deployed correctly
+    - name: Verify that application was deployed correctly
       uri:
         url: "{{ tomcat_application_manager.0.url }}/manager/text/list"
         method: GET

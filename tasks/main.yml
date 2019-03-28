@@ -1,19 +1,19 @@
 ---
 # Role tasks
 
-- name: gather tomcat instances facts
+- name: Gather tomcat instances facts
   include_tasks: facts.yml
   tags:
     - role::tomcat_application
     - role::tomcat_application::facts
 
-- name: sanity checks
+- name: Sanity checks
   include_tasks: check.yml
   tags:
     - role::tomcat_application
     - role::tomcat_application::check
 
-- name: setup application directories
+- name: Setup application directories
   include_tasks: directories.yml
   when:
     - tomcat_application_dirs is defined
@@ -23,7 +23,7 @@
     - role::tomcat_application
     - role::tomcat_application::directories
 
-- name: setup application datasources
+- name: Setup application datasources
   include_tasks: datasources.yml
   when:
     - tomcat_application_datasources is defined
@@ -33,13 +33,13 @@
     - role::tomcat_application
     - role::tomcat_application::datasources
 
-- name: setup application artifacts
+- name: Setup application artifacts
   include_tasks: artifacts.yml
   tags:
     - role::tomcat_application
     - role::tomcat_application::artifacts
 
-- name: verify deployment
+- name: Verify deployment
   include_tasks: verify.yml
   tags:
     - role::tomcat_application

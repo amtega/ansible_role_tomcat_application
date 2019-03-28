@@ -2,7 +2,7 @@
 # Tasks to get tomcat instances facts
 
 - block:
-    - name: search tomcat raw server instances processes
+    - name: Search tomcat raw server instances processes
       shell: >-
         ps axo "%u,%g,%a"
         | grep {{ tomcat_application_server_main_class }}
@@ -14,7 +14,7 @@
       changed_when: false
       failed_when: false
 
-    - name: check instances autodeploy settings
+    - name: Check instances autodeploy settings
       xml:
         path: "{{ tomcat_application_config_path }}"
         xpath: "{{ tomcat_application_host_xpath }}"
@@ -46,7 +46,7 @@
              +"/"
              + tomcat_application_server_config }}
 
-    - name: setup tomcat instances facts
+    - name: Setup tomcat instances facts
       set_fact:
         tomcat_application_server_instances: >-
           {{ lookup('template', 'tomcat_facts.json.j2') | from_yaml }}

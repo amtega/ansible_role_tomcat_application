@@ -2,19 +2,19 @@
 # Tasks to setup application artifacts
 
 - block:
-    - name: setup fact with application artifacts
+    - name: Setup fact with application artifacts
       set_fact:
         tomcat_artifacts_deployed: >-
           {{ lookup('template', 'artifacts.yml.j2') | from_yaml }}
 
-    - name: deploy tomcat application artifacts
+    - name: Deploy tomcat application artifacts
       include_role:
         name: amtega.artifact
       vars:
         artifact_list: "{{ tomcat_artifacts_deployed }}"
       when: tomcat_application_state == "present"
 
-    - name: determining if it is necessary to restart the tomcat service
+    - name: Determining if it is necessary to restart the tomcat service
       command: /bin/true
       changed_when: artifact_result_item.changed
       loop: >-
@@ -36,7 +36,7 @@
                              + tomcat_application_item.1.id] }}
 
     - block:
-        - name: remove tomcat application deployed directories
+        - name: Remove tomcat application deployed directories
           file:
             path: >-
               {{ tomcat_application_item.0.base
