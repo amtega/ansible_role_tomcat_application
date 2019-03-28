@@ -2,10 +2,6 @@
 
 This is an [Ansible](http://www.ansible.com) role that deploys applications in tomcat server instances configuring also datasources and directories.
 
-## Requirements
-
-[Ansible 2.7+](http://docs.ansible.com/ansible/latest/intro_installation.html)
-
 ## Role Variables
 
 A list of all the default variables for this role is available in `defaults/main.yml`. The role setups the following facts:
@@ -14,11 +10,6 @@ A list of all the default variables for this role is available in `defaults/main
 
 - `tomcat_application_datasources_deployed`: application datasources deployed.
 - `tomcat_artifacts_deployed`: application datasources deployed
-
-## Dependencies
-
-- [amtega.check_platform](https://galaxy.ansible.com/amtega/check_platform)
-- [amtega.artifact](https://galaxy.ansible.com/amtega/artifact)
 
 ## Example Playbook
 
@@ -56,7 +47,22 @@ This is an example playbook:
           maxWaitMilli: 10000
           url: dbc:acme:@DATABASE
           user: app
-          password: app_password        
+          password: app_password    
+      tomcat_application_managers:
+        - instance: tomcat@server1
+          url: http://localhost:8080
+          user: admin
+          password: admin
+          timeout: 5
+          retries: 5
+          delay: 3     
+        - instance: tomcat@server2
+          url: http://localhost:8081
+          user: admin
+          password: admin
+          timeout: 5
+          retries: 5
+          delay: 3                     
 ```
 
 ## Testing
@@ -72,19 +78,13 @@ $ ansible-playbook main.yml
 
 ## License
 
-Copyright (C) 2018 AMTEGA - Xunta de Galicia
+Copyright (C) 2019 AMTEGA - Xunta de Galicia
 
-This role is free software: you can redistribute it and/or modify
-it under the terms of:
-GNU General Public License version 3, or (at your option) any later version;
-or the European Union Public License, either Version 1.2 or – as soon
-they will be approved by the European Commission ­subsequent versions of
-the EUPL;
+This role is free software: you can redistribute it and/or modify it under the terms of:
 
-This role is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details or European Union Public License for more details.
+GNU General Public License version 3, or (at your option) any later version; or the European Union Public License, either Version 1.2 or – as soon they will be approved by the European Commission ­subsequent versions of the EUPL.
+
+This role is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details or European Union Public License for more details.
 
 ## Author Information
 

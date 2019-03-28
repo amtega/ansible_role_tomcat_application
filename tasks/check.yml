@@ -5,9 +5,12 @@
     - name: verify tomcat server instances
       assert:
         that:
-          - item in server_instances_names
+          - tomcat_application_instance in server_instances_names
         msg: "application tomcat instance must be running in server"
       loop: "{{ tomcat_application_instances }}"
+      loop_control:
+        loop_var: tomcat_application_instance
+        label: "{{ tomcat_application_instance }}"
       vars:
         server_instances_names: >-
           {{ tomcat_application_server_instances

@@ -24,9 +24,11 @@
         {{ tomcat_application_search_instances_result.stdout_lines
            | default([]) }}
       loop_control:
+        loop_var: tomcat_application_item
         label: "{{ tomcat_application_tomcat_base }}"
       vars:
-        tomcat_application_fields: "{{ item.split(',') | map('trim') | list }}"
+        tomcat_application_fields: >-
+          {{ tomcat_application_item.split(',') | map('trim') | list }}
         tomcat_application_command: "{{ tomcat_application_fields[2] }}"
         tomcat_application_tomcat_base: >-
           {{ tomcat_application_command.split("-D")

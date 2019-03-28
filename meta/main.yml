@@ -28,9 +28,13 @@ galaxy_info:
 
 dependencies:
   - role: amtega.check_platform
-    check_platform_distributions:
-      centos: 6
-      fedora: 27
-      rhel: 6
-    check_platform_variables:
-      - tomcat_application_name
+    vars:
+      check_platform_distributions:
+        centos: 6
+        fedora: 27
+        rhel: 6
+      check_platform_variables:
+        - tomcat_application_name
+
+  - role: amtega.artifact
+    when: no

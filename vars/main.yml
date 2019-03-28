@@ -1,20 +1,6 @@
 ---
 # Role variables
 
-# Supported distributions
-
-tomcat_application_supported_distributions:
-  - centos
-  - fedora
-  - rhel
-
-# Supported distributions versions
-
-tomcat_application_supported_versions:
-  centos: 6
-  fedora: 27
-  rhel: 6
-
 # Config files paths (relative to tomcat base)
 
 tomcat_application_server_config: conf/server.xml

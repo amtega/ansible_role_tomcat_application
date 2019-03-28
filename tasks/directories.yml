@@ -4,10 +4,11 @@
 - block:
     - name: setup application directories
       file:
-        path: "{{ item.0.base }}/{{ item.1 }}"
+        path: >-
+          {{ tomcat_application_item.0.base }}/{{ tomcat_application_item.1 }}
         state: directory
-        owner: "{{ item.0.user }}"
-        group: "{{ item.0.group }}"
+        owner: "{{ tomcat_application_item.0.user }}"
+        group: "{{ tomcat_application_item.0.group }}"
         mode: 0755
       when: tomcat_application_state == "present"
       loop: >-
@@ -15,11 +16,14 @@
                  tomcat_application_server_instances,
                  tomcat_application_dirs) }}
       loop_control:
-        label: "{{ item.0.base }}/{{ item.1 }}"
+        loop_var: tomcat_application_item
+        label: >-
+          {{ tomcat_application_item.0.base }}/{{ tomcat_application_item.1 }}
 
     - name: remove application directories
       file:
-        path: "{{ item.0.base }}/{{ item.1 }}"
+        path: >-
+          {{ tomcat_application_item.0.base }}/{{ tomcat_application_item.1 }}
         state: absent
       when:
         - tomcat_application_state == "absent"
@@ -29,7 +33,9 @@
                  tomcat_application_server_instances,
                  tomcat_application_dirs) }}
       loop_control:
-        label: "{{ item.0.base }}/{{ item.1 }}"
+        loop_var: tomcat_application_item
+        label: >-
+          {{ tomcat_application_item.0.base }}/{{ tomcat_application_item.1 }}
   tags:
     - role::tomcat_application
     - role::tomcat_application::directories

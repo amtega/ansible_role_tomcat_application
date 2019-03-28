@@ -38,3 +38,9 @@
   tags:
     - role::tomcat_application
     - role::tomcat_application::artifacts
+
+- name: verify deployment
+  include_tasks: verify.yml
+  tags:
+    - role::tomcat_application
+    - role::tomcat_application::verify

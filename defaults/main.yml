@@ -111,6 +111,34 @@ tomcat_application_instance_restart_pause: 1
 
 tomcat_application_instance_restart_become_method: su
 
-# Max time given to the tomcat autodeploy process to complete the task
+# List of dicts with the settings to use to connect to the tomcat manager for
+# deployment verification. If the config is missing no check will be done. The
+# dicts has the following structure:
+#
+# {
+#   intance: <instance>   # Instance as described in
+#                         # `tomcat_application_isntances`
+#   url: <url>            # Url to tomcat manager
+#   user: <user>          # User with access privileges to tomcat manager
+#   password: <password>  # Password of the previous user
+#   timeout: <s>          # Timeout in seconds. Default is 5
+#   retries: <n>          # Number of retries. Default is 0
+#   delay: <s>            # Delay in seconds between attempts. Default is 0
+# }
+#
+# Example:
+#
+# tomcat_application_managers:
+#   - instance: tomcat
+#     url: http://localhost:8080
+#     user: admin
+#     password: admin
+#     timeout: 5
+#     retries: 5
+#     delay: 3
 
-tomcat_application_autodeply_max_time: 300
+tomcat_application_managers: {}
+
+# Hide sensitive information
+
+tomcat_application_no_log: yes
