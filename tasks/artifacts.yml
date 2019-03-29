@@ -16,7 +16,9 @@
 
     - name: Determining if it is necessary to restart the tomcat service
       command: /bin/true
-      changed_when: artifact_result_item.changed
+      changed_when:
+        - artifact_result_item.changed
+        - not tomcat_application_item.0.autodeploy
       loop: >-
         {{ query('nested',
                  tomcat_application_server_instances,

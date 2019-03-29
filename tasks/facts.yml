@@ -50,8 +50,6 @@
       set_fact:
         tomcat_application_server_instances: >-
           {{ lookup('template', 'tomcat_facts.json.j2') | from_yaml }}
-
-    - fail:
   tags:
     - role::tomcat_application
     - role::tomcat_application::facts

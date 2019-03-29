@@ -23,7 +23,7 @@
                       | regex_replace("catalina.base=", "")
                       | trim %}
 {% set process_host_config = (tomcat_application_check_autodeploy_result.results
-                              | selectattr("item",
+                              | selectattr("tomcat_application_item",
                                            "search",
                                            "catalina.base=" + process_base)
                               | first)["matches"][0]["Host"] %}

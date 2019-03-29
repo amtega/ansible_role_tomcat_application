@@ -1,0 +1,9 @@
+{% for result in tomcat_application_manager_result.results %}
+- instance: "{{ result.tomcat_application_instance }}"
+  state: "{{ (result.content.split("\n")
+             | select('search', '/' + tomcat_application_name + ':')
+             | list
+             | first).split(':').1 }}"
+{% else %}
+[]
+{% endfor %}
