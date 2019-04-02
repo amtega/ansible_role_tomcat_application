@@ -36,5 +36,19 @@ dependencies:
       check_platform_variables:
         - tomcat_application_name
 
+  - role: amtega.packages
+    vars:
+      packages_os:
+        centos:
+          all:
+            python-lxml: present
+        fedora:
+          all:
+            python2-lxml: present
+            python3-lxml: present
+        rhel:
+          all:
+            python-lxml: present
+
   - role: amtega.artifact
     when: no

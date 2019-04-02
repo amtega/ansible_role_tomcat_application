@@ -34,6 +34,33 @@
       tomcat_server_https_port: 8444
       tomcat_server_ajp_port: 8010
   tasks:
+    - name: Configure tomcat users
+      copy:
+        dest: "/srv/tomcat/tomcat@{{ item }}/conf/tomcat-users.xml"
+        content: >-
+          <tomcat-users>
+            <role rolename="admin-gui"/>
+            <role rolename="manager-gui"/>
+            <role rolename="manager-jmx"/>
+            <role rolename="manager-script"/>
+            <role rolename="manager-status"/>
+            <user username="admin"
+                  password="admin"
+                  roles="admin-gui,manager-gui,manager-script,manager-jmx,
+                         manager-status"/>
+          </tomcat-users>
+      loop:
+        - server1
+        - server2
+
+    - name: Restart tomcat servers
+      service:
+        name: "tomcat@{{ item }}"
+        state: restarted
+      loop:
+        - server1
+        - server2
+
     - name: Download sample application
       get_url:
         url: https://tomcat.apache.org/tomcat-8.0-doc/appdev/sample/sample.war
@@ -75,7 +102,7 @@
       maxWait: 10000
       parameters: ['useSSL=false']
 
-    tomcat_application_name: myapp
+    tomcat_application_name: sample
     tomcat_application_instances:
       - tomcat@server1
       - tomcat@server2
@@ -125,13 +152,19 @@
         url: dbc:acme:@DATABASE
         user: app
         password: app_password
-    # tomcat_application_managers:
-    #   - instance: tomcat@server1
-    #     url: http://localhost:8080
-    #     user: admin
-    #     password: admin
-    #     timeout: 5
-    #     retries: 5
+    tomcat_application_managers:
+      - instance: tomcat@server1
+        url: http://localhost:8080
+        user: admin
+        password: admin
+        timeout: 5
+        retries: 5
+      - instance: tomcat@server2
+        url: http://localhost:8080
+        user: admin
+        password: admin
+        timeout: 5
+        retries: 5
   tasks:
     - meta: flush_handlers
 
