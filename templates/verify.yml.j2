@@ -1,9 +1,13 @@
-{% for result in tomcat_application_manager_result.results %}
+{% for result in tomcat_application_manager_result.results | reject("skipped") | list %}
+{% set output = result.content.split("\n")
+                | select('search', '/' + tomcat_application_name + ':')
+                | list %}
 - instance: "{{ result.tomcat_application_instance }}"
-  state: "{{ (result.content.split("\n")
-             | select('search', '/' + tomcat_application_name + ':')
-             | list
-             | first).split(':').1 }}"
+{% if output | length > 0 and (output | first).split(':').1 == "running" %}
+  state: present
+{% else %}
+  state: absent
+{% endif %}
 {% else %}
 []
 {% endfor %}

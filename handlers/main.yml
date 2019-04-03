@@ -4,23 +4,25 @@
 - block:
     - name: Tomcat_application restart tomcat instances using os services
       service:
-        name: "{{ instance.name }}"
+        name: "{{ tomcat_application_instance.name }}"
         state: restarted
       loop: >-
         {{ tomcat_application_server_instances
            | selectattr("service", "equalto", true)
            | list }}
       loop_control:
-        loop_var: instance
-        label: "{{ instance.name }}"
+        loop_var: tomcat_application_instance
+        label: "{{ tomcat_application_instance.name }}"
       listen:
         - shutdown tomcat instance
         - start tomcat instance
 
     - name: Tomcat_application shutdown tomcat instance using custom scripts
       shell: >-
-        {{ instance.base }}/{{ tomcat_application_instance_shutdown
-                               | default(default_shutdown) }} ;
+        {{ tomcat_application_instance.base
+           + "/"
+           + tomcat_application_instance_shutdown
+             | default(default_shutdown) }} ;
         sleep {{ tomcat_application_instance_restart_pause }}
       args:
         warn: no
@@ -33,12 +35,12 @@
            | selectattr("service", "equalto", false)
            | list }}
       loop_control:
-        loop_var: instance
-        label: "{{ instance.name }}"
+        loop_var: tomcat_application_instance
+        label: "{{ tomcat_application_instance.name }}"
       notify:
         - start tomcat instance
       become: yes
-      become_user: "{{ instance.user }}"
+      become_user: "{{ tomcat_application_instance.user }}"
       become_method: "{{ tomcat_application_instance_restart_become_method }}"
       listen: shutdown tomcat instance
 
@@ -47,8 +49,11 @@
       # valid return state !=0 if the process is running
 
     - name: Tomcat_application start tomcat instance using custom scripts
-      command: "{{ instance.base }}/{{ tomcat_application_instance_startup
-                                       | default(default_startup) }}"
+      command: >-
+        {{ tomcat_application_instance.base
+           + "/"
+           + tomcat_application_instance_startup
+             | default(default_startup) }}
       register: tomcat_application_start_instance_result
       failed_when: >-
         tomcat_application_start_instance_result.rc != 0
@@ -63,15 +68,16 @@
            | selectattr("service", "equalto", false)
            | list }}
       loop_control:
-        loop_var: instance
-        label: "{{ instance.name }}"
+        loop_var: tomcat_application_instance
+        label: "{{ tomcat_application_instance.name }}"
       become: yes
-      become_user: "{{ instance.user }}"
+      become_user: "{{ tomcat_application_instance.user }}"
       become_method: "{{ tomcat_application_instance_restart_become_method }}"
       listen: start tomcat instance
 
   when: >-
-    (not instance.autodeploy and (artifacts_changed or undeploy_changed))
+    (not tomcat_application_instance.autodeploy
+     and (artifacts_changed or undeploy_changed))
     or ds_setup_changed
   vars:
     artifacts_changed: >-
@@ -90,7 +96,7 @@
          | select("changed")
          | selectattr("tomcat_application_item.0.base",
                       "equalto",
-                      instance.base)
+                      tomcat_application_instance.base)
          | list
          | length > 0 }}
 
@@ -103,15 +109,15 @@
          | select("changed")
          | selectattr("tomcat_application_item.0.base",
                       "equalto",
-                      instance.base)
+                      tomcat_application_instance.base)
          | list
          | length > 0 }}
 
     default_startup: >-
-      {{ (instance.jsvc)
+      {{ (tomcat_application_instance.jsvc)
          | ternary("bin/daemon.sh start", "bin/startup.sh") }}
     default_shutdown: >-
-      {{ (instance.jsvc)
+      {{ (tomcat_application_instance.jsvc)
          | ternary("bin/daemon.sh stop", "bin/shutdown.sh") }}
   tags:
     - role::tomcat_application
