@@ -59,7 +59,7 @@ dependencies:
             lxml==4.2.6: present
         rhel:
           6:
-            lxml==4.2.6: present  
+            lxml==4.2.6: present
 
   - role: amtega.artifact
     when: no

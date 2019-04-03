@@ -8,7 +8,7 @@
       uri:
         url: "{{ tomcat_application_manager.0.url }}/manager/text/list"
         method: GET
-        user: "{{ tomcat_application_manager.0.user | default(omit )}}"
+        user: "{{ tomcat_application_manager.0.user | default(omit ) }}"
         password: "{{ tomcat_application_manager.0.password | default(omit) }}"
         return_content: yes
         timeout: "{{ tomcat_application_manager.0.timeout | default(3) }}"
