@@ -1,7 +1,7 @@
 ---
 # Tasks for testing role
 
-- name: run idempotence test
+- name: Run idempotence test
   hosts: localhost
   roles:
     - role: amtega.docker_presets
@@ -16,13 +16,28 @@
   tags:
     - sandbox
 
-- name: prepare docker containers for test
+- name: Prepare docker containers for test
   hosts: docker_sandbox_containers
   roles:
     - role: amtega.tomcat
       tomcat_name: tomcat@server1
       tomcat_base: /srv/tomcat/tomcat@server1
       tomcat_version: 8.0.9
+      tomcat_cms_roles:
+        - manager-gui
+        - admin-gui
+        - manager-script
+        - manager-jmx
+        - manager-status
+      tomcat_cms_users:
+        - username: admin
+          password: admin
+          roles:
+            - admin-gui
+            - manager-gui
+            - manager-script
+            - manager-jmx
+            - manager-status
 
     - role: amtega.tomcat
       tomcat_name: tomcat@server2
@@ -33,8 +48,23 @@
       tomcat_server_http_port: 8081
       tomcat_server_https_port: 8444
       tomcat_server_ajp_port: 8010
+      tomcat_cms_roles:
+        - manager-gui
+        - admin-gui
+        - manager-script
+        - manager-jmx
+        - manager-status
+      tomcat_cms_users:
+        - username: admin
+          password: admin
+          roles:
+            - admin-gui
+            - manager-gui
+            - manager-script
+            - manager-jmx
+            - manager-status
   tasks:
-    - name: download sample application
+    - name: Download sample application
       get_url:
         url: https://tomcat.apache.org/tomcat-8.0-doc/appdev/sample/sample.war
         dest: /tmp/sample2.war
@@ -44,7 +74,7 @@
     - prepare
     - idempotence
 
-- name: test tomcat_application role application deploy
+- name: Test tomcat_application role application deploy
   hosts: docker_sandbox_containers
   roles:
     - role: amtega.tomcat_application
@@ -75,7 +105,7 @@
       maxWait: 10000
       parameters: ['useSSL=false']
 
-    tomcat_application_name: myapp
+    tomcat_application_name: sample
     tomcat_application_instances:
       - tomcat@server1
       - tomcat@server2
@@ -125,10 +155,23 @@
         url: dbc:acme:@DATABASE
         user: app
         password: app_password
+    tomcat_application_managers:
+      - instance: tomcat@server1
+        url: http://localhost:8080
+        user: admin
+        password: admin
+        timeout: 5
+        retries: 5
+      - instance: tomcat@server2
+        url: http://localhost:8080
+        user: admin
+        password: admin
+        timeout: 5
+        retries: 5
   tasks:
     - meta: flush_handlers
 
-    - name: search application dirs
+    - name: Search application dirs
       stat:
         path: "{{ item.0.base }}/{{ item.1 }}"
       loop: >-
@@ -139,7 +182,7 @@
       loop_control:
         label: "{{ item.0.base }}/{{ item.1 }}"
 
-    - name: check application dirs exist
+    - name: Check application dirs exist
       assert:
         that: item
       loop: >-
@@ -147,7 +190,7 @@
            | map(attribute='stat.exists')
            | list }}
 
-    - name: check datasources config
+    - name: Check datasources config
       xml:
         path: "{{ item.0.base }}/conf/context.xml"
         xpath: "/Context/Resource[@name='{{ item.1.name }}']"
@@ -169,11 +212,11 @@
       loop: >-
         {{ query('nested',
                  tomcat_application_server_instances,
-                 tomcat_application_datasources_templated) }}
+                 tomcat_application_datasources_deployed) }}
       loop_control:
         label: "{{ item.0.name }} {{ item.1.name }}"
 
-    - name: search application artifacts
+    - name: Search application artifacts
       stat:
         path: "{{ item }}"
       loop:
@@ -183,7 +226,7 @@
         - /srv/tomcat/tomcat@server2/webapps/sample2.war
       register: check_artifacts_result
 
-    - name: check application artifacts exist
+    - name: Check application artifacts exist
       assert:
         that: item
       loop: >-
@@ -191,7 +234,7 @@
            | map(attribute='stat.exists')
            | list }}
 
-    - name: check application is working
+    - name: Check application is working
       uri:
         url: "{{ item }}"
         return_content: yes
@@ -210,12 +253,12 @@
   tags:
     - idempotence
 
-- name: test tomcat_application role application undeploy
+- name: Test tomcat_application role application undeploy
   hosts: docker_sandbox_containers
   roles:
     - role: amtega.tomcat_application
   vars:
-    tomcat_application_name: myapp
+    tomcat_application_name: sample
     tomcat_application_instances:
       - tomcat@server1
       - tomcat@server2
@@ -277,7 +320,7 @@
   tasks:
     - meta: flush_handlers
 
-    - name: search application dirs
+    - name: Search application dirs
       stat:
         path: "{{ item.0.base }}/{{ item.1 }}"
       loop: >-
@@ -288,7 +331,7 @@
       loop_control:
         label: "{{ item.0.base }}/{{ item.1 }}"
 
-    - name: check application dirs does not exist
+    - name: Check application dirs does not exist
       assert:
         that: not item
       loop: >-
@@ -296,7 +339,7 @@
            | map(attribute='stat.exists')
            | list }}
 
-    - name: check datasources config
+    - name: Check datasources config
       xml:
         path: "{{ item.0.base }}/conf/context.xml"
         xpath: "/Context/Resource[@name='{{ item.1.name }}']"
@@ -306,11 +349,11 @@
       loop: >-
         {{ query('nested',
                  tomcat_application_server_instances,
-                 tomcat_application_datasources_templated) }}
+                 tomcat_application_datasources_deployed) }}
       loop_control:
         label: "{{ item.0.name }} {{ item.1.name }}"
 
-    - name: search application artifacts
+    - name: Search application artifacts
       stat:
         path: "{{ item }}"
       loop:
@@ -324,7 +367,7 @@
         - /srv/tomcat/tomcat@server2/webapps/sample2
       register: check_application_artifacts_result
 
-    - name: check application artifacts does not exist
+    - name: Check application artifacts does not exist
       assert:
         that: not item
       loop: >-
@@ -332,7 +375,7 @@
            | map(attribute='stat.exists')
            | list }}
 
-    - name: check application is not working
+    - name: Check application is not working
       uri:
         url: "{{ item }}"
         return_content: yes
@@ -346,7 +389,7 @@
         - http://localhost:8081/sample
         - http://localhost:8081/sample2
 
-- name: cleanup docker sandbox
+- name: Cleanup docker sandbox
   hosts: localhost
   roles:
     - role: amtega.docker_sandbox

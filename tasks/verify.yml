@@ -1,0 +1,51 @@
+---
+# Role verify tasks
+
+- block:
+    - meta: flush_handlers
+
+    - name: Verify application deployment in tomcat manager
+      uri:
+        url: "{{ tomcat_application_manager.0.url }}/manager/text/list"
+        method: GET
+        user: "{{ tomcat_application_manager.0.user | default(omit ) }}"
+        password: "{{ tomcat_application_manager.0.password | default(omit) }}"
+        return_content: yes
+        timeout: "{{ tomcat_application_manager.0.timeout | default(3) }}"
+      register: tomcat_application_manager_result
+      failed_when: no
+      retries: "{{ tomcat_application_manager.0.retries | default(0) }}"
+      delay: "{{ tomcat_application_manager.0.delay | default(0) }}"
+      until: >-
+        tomcat_application_manager_result.content
+        is search("/" + tomcat_application_name + ":running")
+      when: tomcat_application_manager | length > 0
+      no_log: "{{ tomcat_application_no_log }}"
+      loop: "{{ tomcat_application_instances }}"
+      loop_control:
+        loop_var: tomcat_application_instance
+        label: "{{ tomcat_application_instance }}"
+      vars:
+        tomcat_application_manager: >-
+          {{ tomcat_application_managers
+             | selectattr("instance", "equalto", tomcat_application_instance)
+             | list }}
+
+    - name: Assert that application was deployed correctly
+      assert:
+        that: tomcat_application_item.state == tomcat_application_state
+        success_msg: >-
+          Application {{ tomcat_application_name }}
+          {{ tomcat_application_state }}
+          in {{ tomcat_application_item.instance }} instance
+        fail_msg: >-
+          Application {{ tomcat_application_name }} failed to be
+          {{ tomcat_application_state }} in
+          {{ tomcat_application_item.instance }} instance
+      loop: "{{ lookup('template', 'verify.yml.j2') | from_yaml }}"
+      loop_control:
+        loop_var: tomcat_application_item
+        label: "{{ tomcat_application_item.instance }}"
+  tags:
+    - role::tomcat_application
+    - role::tomcat_application::verify

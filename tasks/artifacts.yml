@@ -2,84 +2,65 @@
 # Tasks to setup application artifacts
 
 - block:
-    - block:
-        - name: deploy tomcat application artifacts
-          include_role:
-            name: amtega.artifact
-          vars:
-            artifact_list: >-
-              {{ lookup('template', 'artifacts.yml.j2') | from_yaml }}
-          when: tomcat_application_state == "present"
+    - name: Setup fact with application artifacts
+      set_fact:
+        tomcat_artifacts_deployed: >-
+          {{ lookup('template', 'artifacts.yml.j2') | from_yaml }}
 
-        - name: determining if it is necessary to restart the tomcat service
-          command: /bin/true
-          changed_when: artifact_result_item.changed
-          loop: >-
-            {{ query('nested',
-                     tomcat_application_server_instances,
-                     tomcat_application_artifacts) }}
-          loop_control:
-            loop_var: tomcat_application_item
-            label: >-
-              {{ tomcat_application_item.0.base }}
-              {{ tomcat_application_item.1.file }}
-          notify:
-            - shutdown tomcat instance
-          vars:
-            artifact_result_item: >-
-              {{ artifact_result["tomcat_application_"
-                                 + tomcat_application_name
-                                 + "_"
-                                 + tomcat_application_item.1.id] }}
-      when: tomcat_application_state == "present"
+    - name: Deploy tomcat application artifacts
+      include_role:
+        name: amtega.artifact
+      vars:
+        artifact_list: "{{ tomcat_artifacts_deployed }}"
 
-    - block:
-        - name: remove tomcat application artifacts
-          file:
-            path: >-
-              {{ tomcat_application_item.0.base
-                 +"/"
-                 + tomcat_application_item.1.dest
-                 + "/"
-                 + tomcat_application_item.1.file }}
-            state: absent
-          register: tomcat_application_undeploy_artifacts_result
-          loop: >-
-            {{ query('nested',
-                     tomcat_application_server_instances,
-                     tomcat_application_artifacts) }}
-          loop_control:
-            loop_var: tomcat_application_item
-            label: >-
-              {{ tomcat_application_item.0.base }}
-              {{ tomcat_application_item.1.file }}
-          notify:
-            - shutdown tomcat instance
+    - name: Determining if it is necessary to restart the tomcat service
+      command: /bin/true
+      changed_when:
+        - artifact_result_item.changed
+        - not tomcat_application_item.0.autodeploy
+      loop: >-
+        {{ query('nested',
+                 tomcat_application_server_instances,
+                 tomcat_artifacts_deployed) }}
+      loop_control:
+        loop_var: tomcat_application_item
+        label: >-
+          {{ tomcat_application_item.0.base }}
+          {{ tomcat_application_item.1.id }}
+      notify:
+        - shutdown tomcat instance
+      vars:
+        artifact_result_item: >-
+          {{ artifact_result[tomcat_application_item.1.id] }}
 
-        - name: remove tomcat application deployed directories
-          file:
-            path: >-
-              {{ tomcat_application_item.0.base
-                 + "/"
-                 + tomcat_application_item.1.dest
-                 + "/"
-                 + (tomcat_application_item.1.file | splitext).0 }}
-            state: absent
-          register: tomcat_application_undeploy_artifacts_dirs_result
-          loop: >-
-            {{ query('nested',
-                     tomcat_application_server_instances,
-                     tomcat_application_artifacts
-                     | selectattr("file", "search", "\.war$")
-                     | list) }}
-          loop_control:
-            loop_var: tomcat_application_item
-            label: >-
-              {{ tomcat_application_item.0.base }}
-              (tomcat_application_item.1.file | splitext).0
-          notify:
-            - shutdown tomcat instance
-      when: tomcat_application_state == "absent"
+    - name: Remove tomcat application webapps artifacts
+      file:
+        path: >-
+          {{ tomcat_application_item.0.base
+             + "/webapps/"
+             + tomcat_application_item.1 }}
+        state: absent
+      register: tomcat_application_undeploy_artifacts_dirs_result
+      when:
+        - not tomcat_application_item.0.autodeploy
+        - tomcat_application_state == "absent"
+      loop: >-
+        {{ query("nested",
+                 tomcat_application_server_instances,
+                 tomcat_application_artifacts) }}
+      loop_control:
+        loop_var: tomcat_application_item
+        label: >-
+          {{ tomcat_application_item.0.base
+             + "/webapps/"
+             + tomcat_application_item.1 }}
+      notify:
+        - shutdown tomcat instance
+      vars:
+        tomcat_application_artifacts:
+          - "{{ tomcat_application_name }}"
+          - "{{ tomcat_application_name }}.war"
+
   tags:
     - role::tomcat_application
     - role::tomcat_application::artifacts

@@ -1,6 +1,6 @@
 {% set ns = namespace(found=false) %}
 {% for instance in tomcat_application_server_instances %}
-{% for ds in tomcat_application_datasources_templated %}
+{% for ds in tomcat_application_datasources_deployed %}
 {% set ns.found = true %}
 - base: "{{ instance.base }}"
   name: "{{ ds.name }}"
