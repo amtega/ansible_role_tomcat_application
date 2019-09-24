@@ -16,9 +16,7 @@
       failed_when: no
       retries: "{{ tomcat_application_manager.0.retries | default(0) }}"
       delay: "{{ tomcat_application_manager.0.delay | default(0) }}"
-      until: >-
-        tomcat_application_manager_result.content
-        is search("/" + tomcat_application_name + ":running")
+      until: tomcat_appliction_manager_check
       when: tomcat_application_manager | length > 0
       no_log: "{{ tomcat_application_no_log }}"
       loop: "{{ tomcat_application_instances }}"
@@ -30,6 +28,12 @@
           {{ tomcat_application_managers
              | selectattr("instance", "equalto", tomcat_application_instance)
              | list }}
+        tomcat_appliction_manager_check: >-
+          {{ (tomcat_application_state == "present")
+             | ternary(tomcat_application_manager_result.content
+                       is search("/" + tomcat_application_name + ":running"),
+                       not tomcat_application_manager_result.content
+                       is search("/" + tomcat_application_name + ":")) }}
 
     - name: Assert that application was deployed correctly
       assert:
