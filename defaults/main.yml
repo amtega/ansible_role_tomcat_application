@@ -139,6 +139,10 @@ tomcat_application_instance_restart_become_method: su
 
 tomcat_application_managers: {}
 
+# Force application deployment
+
+tomcat_application_force: no
+
 # Hide sensitive information
 
 tomcat_application_no_log: yes
