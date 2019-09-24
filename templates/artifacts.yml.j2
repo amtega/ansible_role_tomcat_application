@@ -5,7 +5,8 @@
                    "dest": instance.base + "/" + artifact.dest,
                    "owner": instance.user,
                    "group": instance.group,
-                   "state": tomcat_application_state } %}
+                   "state": tomcat_application_state,
+                   "force": tomcat_application_force } %}
 {% set artifact = artifact | combine(override) %}
 {% set ns.found = true %}
 - {{ artifact | to_json }}
