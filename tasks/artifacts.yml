@@ -38,7 +38,7 @@
         path: >-
           {{ tomcat_application_item.0.base
              + "/webapps/"
-             + tomcat_application_item.1 }}
+             + (tomcat_application_item.1.dest_file | splitext).0 }}
         state: absent
       register: tomcat_application_undeploy_artifacts_dirs_result
       when:
@@ -53,7 +53,7 @@
         label: >-
           {{ tomcat_application_item.0.base
              + "/webapps/"
-             + tomcat_application_item.1 }}
+             + (tomcat_application_item.1.dest_file | splitext).0 }}
       notify:
         - shutdown tomcat instance
       vars:
