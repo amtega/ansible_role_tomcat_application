@@ -27,7 +27,7 @@
         state: absent
       when:
         - tomcat_application_state == "absent"
-        - tomcat_application_dirs_remove
+        - tomcat_application_dirs_remove | bool
       loop: >-
         {{ query('nested',
                  tomcat_application_server_instances,
