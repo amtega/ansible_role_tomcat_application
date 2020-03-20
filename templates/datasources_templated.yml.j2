@@ -1,14 +1,23 @@
 {%- if tomcat_application_datasource.template is defined -%}
     {%- set tomcat_application_datasource_template = lookup("vars", tomcat_application_datasource.template) -%}
-    {%- set ds = tomcat_application_datasource_template | combine(tomcat_application_datasource) -%}
 {%- else -%}
-    {%- set ds = tomcat_application_datasource -%}
+    {%- set tomcat_application_datasource_template = {} -%}
 {%- endif -%}
 
-{%- set ns = namespace(ds={}) -%}
-{%- for k in ds.keys() | list -%}
-    {%- if not k is search("_.*") -%}
-        {%- set ns.ds = ns.ds | combine({ k: ds[k] }) -%}
-    {%- endif -%}
+{% set exclude_attributes = tomcat_application_datasource.exclude_attributes | default(['template'])
+                            + tomcat_application_datasource_template.exclude_attributes | default(['template']) %}
+{%- set ns = namespace(ds={}}) -%}
+{%- for k in tomcat_application_datasource.keys() | list -%}
+  {% if k not in exclude_attributes %}
+    {%- set ns.ds = ns.ds | combine({ k: tomcat_application_datasource[k] }) -%}
+  {% endif %}
+{%- endfor -%}
+{%- for k in tomcat_application_datasource_template.keys() | list -%}
+  {% if k not in exclude_attributes %}
+    {%- set ns.ds = ns.ds | combine({ k: tomcat_application_datasource_template[k] }) -%}
+  {% endif %}
 {%- endfor -%}
 - {{ ns.ds | to_json }}{{ "\n" }}
+
+
+exclude_attributes
