@@ -45,10 +45,14 @@ tomcat_application_dirs_remove: false
 # the variables `tomcat_application_datasource_index0` (starts with 0) and
 # `tomcat_application_datasource_index1` (starts with 1)
 #
-# Also, in the template you can use the variable `tomcat_application_datasource`
-# to refer the concrete datasource being expanded. During the expansion the
-# datasource attributes starting with `_` will not be included in the final
-# config. Sample:
+# In the template you can use the variable `tomcat_application_datasource`
+# to refer the concrete datasource being expanded.
+#
+# Also, you can use the attribute exclude_attributes in the datasource or the
+# template to list the attribute names you don't want to be included in the
+# final tomcat datasource. Default is ['template'].
+#
+# Sample:
 #
 # my_template:
 #   name: >-
@@ -59,7 +63,7 @@ tomcat_application_dirs_remove: false
 #   factory: org.apache.tomcat.jdbc.pool.DataSourceFactory
 #   type: javax.sql.DataSource
 #   driverClassName: com.mysql.jdbc.Driver
-#   url: "jdbc:mysql://{{ tomcat_application_datasource._server }}"
+#   url: "jdbc:mysql://{{ tomcat_application_datasource.url }}"
 #   minIdle: 0
 #   maxIdle: 30
 #   initialSize: 5
@@ -116,7 +120,7 @@ tomcat_application_instance_restart_become_method: su
 # dicts has the following structure:
 #
 # {
-#   intance: <instance>   # Instance as described in
+#   instance: <instance>   # Instance as described in
 #                         # `tomcat_application_isntances`
 #   url: <url>            # Url to tomcat manager
 #   user: <user>          # User with access privileges to tomcat manager
