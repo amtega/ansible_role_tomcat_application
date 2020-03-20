@@ -9,7 +9,7 @@ galaxy_info:
     and directories
   company: AMTEGA - Xunta de Galicia
   license: GPLv3 or EUPL
-  min_ansible_version: 2.8
+  min_ansible_version: 2.9
   platforms:
     - name: EL
       versions:
@@ -28,12 +28,38 @@ galaxy_info:
 
 dependencies:
   - role: amtega.check_platform
-    tags:
-      - never
+    vars:
+      check_platform_distributions:
+        centos: 6
+        fedora: 27
+        rhel: 6
+      check_platform_variables:
+        - tomcat_application_name
 
   - role: amtega.packages
-    tags:
-      - never
+    vars:
+      packages_os:
+        centos:
+          6:
+            python-lxml: absent
+          7:
+            python-lxml: present
+        fedora:
+          all:
+            python2-lxml: present
+            python3-lxml: present
+        rhel:
+          6:
+            python-lxml: abbsent
+          7:
+            python-lxml: present
+      packages_python:
+        centos:
+          6:
+            lxml==4.2.6: present
+        rhel:
+          6:
+            lxml==4.2.6: present
 
   - role: amtega.artifact
     tags:
