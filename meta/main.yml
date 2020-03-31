@@ -31,7 +31,7 @@ dependencies:
     vars:
       check_platform_distributions:
         centos: 6
-        fedora: 27
+        fedora: 29
         rhel: 6
       check_platform_variables:
         - tomcat_application_name
