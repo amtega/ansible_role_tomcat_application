@@ -35,13 +35,6 @@
                        not tomcat_application_manager_result.content
                        is search("/" + tomcat_application_name + ":")) }}
 
-
-    - debug: var=tomcat_application_manager_result.results
-
-    - debug: msg="{{ lookup('template', 'verify.yml.j2') | from_yaml }}"
-
-    - debug: var=tomcat_application_state
-
     - name: Assert that application was deployed correctly
       assert:
         that: tomcat_application_item.state == tomcat_application_state
