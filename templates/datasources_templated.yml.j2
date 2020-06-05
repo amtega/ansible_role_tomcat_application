@@ -6,7 +6,7 @@
 
 {% set exclude_attributes = tomcat_application_datasource.exclude_attributes | default(['template'])
                             + tomcat_application_datasource_template.exclude_attributes | default(['template']) %}
-{%- set ns = namespace(ds={}}) -%}
+{%- set ns = namespace(ds={}) -%}
 {%- for k in tomcat_application_datasource.keys() | list -%}
   {% if k not in exclude_attributes %}
     {%- set ns.ds = ns.ds | combine({ k: tomcat_application_datasource[k] }) -%}
