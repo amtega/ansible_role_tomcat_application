@@ -13,7 +13,6 @@ galaxy_info:
   platforms:
     - name: EL
       versions:
-        - 6
         - 7
     - name: Fedora
       versions:
@@ -30,9 +29,9 @@ dependencies:
   - role: amtega.check_platform
     vars:
       check_platform_distributions:
-        centos: 6
+        centos: 7
         fedora: 29
-        rhel: 6
+        rhel: 7
       check_platform_variables:
         - tomcat_application_name
 

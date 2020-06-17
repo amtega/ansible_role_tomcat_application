@@ -77,8 +77,10 @@
 
   when: >-
     (not tomcat_application_instance.autodeploy
+     or tomcat_application_force | bool
      and (artifacts_changed or undeploy_changed))
     or ds_setup_changed
+    or tomcat_application_force | bool
   vars:
     artifacts_changed: >-
       {{ (artifact_result | default({})).values()
