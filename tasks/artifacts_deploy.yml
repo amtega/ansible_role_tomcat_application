@@ -1,0 +1,8 @@
+---
+# Tasks to deploy application artifacts
+
+- name: Deploy tomcat application artifacts
+  include_role:
+    name: amtega.artifact
+  vars:
+    artifact_list: "{{ tomcat_artifacts_deployed }}"

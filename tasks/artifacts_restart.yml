@@ -1,0 +1,24 @@
+---
+# Tasks to determine if application artifacts require tomcat restart
+
+- name: Determining if it is necessary to restart the tomcat service
+  command: /bin/true
+  changed_when:
+    - artifact_result_item.changed
+    - >-
+      not tomcat_application_item.0.autodeploy
+      or tomcat_application_force | bool
+  loop: >-
+    {{ query('nested',
+             tomcat_application_server_instances,
+             tomcat_artifacts_deployed) }}
+  loop_control:
+    loop_var: tomcat_application_item
+    label: >-
+      {{ tomcat_application_item.0.base }}
+      {{ tomcat_application_item.1.id }}
+  notify:
+    - shutdown tomcat instance
+  vars:
+    artifact_result_item: >-
+      {{ artifact_result[tomcat_application_item.1.id] }}

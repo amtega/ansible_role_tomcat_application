@@ -1,0 +1,94 @@
+---
+
+- name: Verify
+  hosts: molecule_hosts
+  gather_facts: no
+  tasks:
+    - meta: flush_handlers
+
+    - name: Search application dirs
+      stat:
+        path: "{{ item.0.base }}/{{ item.1 }}"
+      loop: >-
+        {{ query('nested',
+                 tomcat_application_server_instances,
+                 tomcat_application_dirs) }}
+      register: check_application_dirs_result
+      loop_control:
+        label: "{{ item.0.base }}/{{ item.1 }}"
+
+    - name: Check application dirs exist
+      assert:
+        that: item
+      loop: >-
+        {{ check_application_dirs_result.results
+           | map(attribute='stat.exists')
+           | list }}
+
+    - name: Check datasources config
+      xml:
+        path: "{{ item.0.base }}/conf/context.xml"
+        xpath: "/Context/Resource[@name='{{ item.1.name }}']"
+        content: attribute
+      register: ds
+      failed_when:
+        ds.matches[0].Resource.name != item.1.name | string
+        or ds.matches[0].Resource.auth != item.1.auth | string
+        or ds.matches[0].Resource.type != item.1.type | string
+        or ds.matches[0].Resource.factory != item.1.factory | string
+        or ds.matches[0].Resource.driverClassName
+           != item.1.driverClassName | string
+        or ds.matches[0].Resource.maxTotal != item.1.maxTotal | string
+        or ds.matches[0].Resource.maxIdle != item.1.maxIdle | string
+        or ds.matches[0].Resource.maxWaitMilli != item.1.maxWaitMilli | string
+        or ds.matches[0].Resource.url != item.1.url | string
+        or ds.matches[0].Resource.user != item.1.user | string
+        or ds.matches[0].Resource.password != item.1.password | string
+      loop: >-
+        {{ query('nested',
+                 tomcat_application_server_instances,
+                 tomcat_application_datasources_to_check) }}
+      loop_control:
+        label: "{{ item.0.name }} {{ item.1.name }}"
+
+    - name: Search application artifacts
+      stat:
+        path: "{{ item }}"
+      loop:
+        - /srv/tomcat/tomcat@server1/webapps/sample.war
+        - /srv/tomcat/tomcat@server1/webapps/sample2.war
+        - /srv/tomcat/tomcat@server2/webapps/sample.war
+        - /srv/tomcat/tomcat@server2/webapps/sample2.war
+      register: check_artifacts_result
+
+    - name: Check application artifacts exist
+      assert:
+        that: item
+      loop: >-
+        {{ check_artifacts_result.results
+           | map(attribute='stat.exists')
+           | list }}
+
+    - name: Check application is working
+      uri:
+        url: "{{ item }}"
+        return_content: yes
+      register: check_application_result
+      failed_when: >-
+         not check_application_result.content
+             is search("Sample.*Hello.*World.*Application")
+      until: check_application_result is success
+      retries: 5
+      delay: 5
+      loop:
+        - http://localhost:8080/sample
+        - http://localhost:8080/sample2
+        - http://localhost:8081/sample
+        - http://localhost:8081/sample2
+
+  vars:
+    tomcat_application_server_instances:
+      - name: tomcat@server1
+        base: /srv/tomcat/tomcat@server1
+      - name: tomcat@server2
+        base: /srv/tomcat/tomcat@server2

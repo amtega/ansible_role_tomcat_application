@@ -1,0 +1,7 @@
+---
+# Tasks to setup application artifacts fact
+
+- name: Setup fact with application artifacts
+  set_fact:
+    tomcat_artifacts_deployed: >-
+      {{ lookup('template', 'artifacts.yml.j2') | from_yaml }}

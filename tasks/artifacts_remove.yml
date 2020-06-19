@@ -1,0 +1,56 @@
+---
+# Tasks to remove application artifacts
+
+- block:
+    - name: Check tomcat application webapps artifacts
+      stat:
+        path: "{{ tomcat_application_webapps_artifact_path }}"
+      register: tomcat_application_webapps_artifacts_check_result
+      failed_when: no
+      retries: "{{ tomcat_application_manager.0.retries | default(0) }}"
+      delay: "{{ tomcat_application_manager.0.delay | default(0) }}"
+      until: >-
+        not tomcat_application_webapps_artifacts_check_result.stat.exists
+      loop: >-
+        {{ query("nested",
+                 tomcat_application_server_instances,
+                 tomcat_application_webapps_artifacts) }}
+      loop_control:
+        loop_var: tomcat_application_item
+        label: >-
+          {{ tomcat_application_item.0.base
+             + "/webapps/"
+             + tomcat_application_item.1 }}
+
+    - name: Remove tomcat application webapps artifacts
+      file:
+        path: "{{ tomcat_application_webapps_artifact_path }}"
+        state: absent
+      register: tomcat_application_undeploy_artifacts_dirs_result
+      when: >-
+        not tomcat_application_item.0.autodeploy
+        or tomcat_application_webapps_artifacts_check_result.results
+           [tomcat_application_index].stat.exists
+      loop: >-
+        {{ query("nested",
+                 tomcat_application_server_instances,
+                 tomcat_application_webapps_artifacts) }}
+      loop_control:
+        loop_var: tomcat_application_item
+        index_var: tomcat_application_index
+        label: >-
+          {{ tomcat_application_item.0.base
+             + "/webapps/"
+             + tomcat_application_item.1 }}
+      notify:
+        - shutdown tomcat instance
+
+  vars:
+    tomcat_application_webapps_artifacts:
+      - "{{ tomcat_application_name }}"
+      - "{{ tomcat_application_name }}.war"
+
+    tomcat_application_webapps_artifact_path: >-
+      {{ tomcat_application_item.0.base
+         + "/webapps/"
+         + tomcat_application_item.1 }}

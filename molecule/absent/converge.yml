@@ -1,0 +1,10 @@
+---
+
+- name: Converge
+  hosts: molecule_hosts
+  gather_facts: no
+  roles:
+    - role: amtega.tomcat_application
+      vars:
+        tomcat_application_state: absent
+        tomcat_application_dirs_remove: yes
