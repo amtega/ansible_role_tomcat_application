@@ -50,7 +50,7 @@
       - "{{ tomcat_application_name }}"
       - "{{ tomcat_application_name }}.war"
 
-  tomcat_application_webapps_artifact_path: >-
-    {{ tomcat_application_item.0.base
-       + "/webapps/"
-       + tomcat_application_item.1 }}
+    tomcat_application_webapps_artifact_path: >-
+      {{ tomcat_application_item.0.base
+         + "/webapps/"
+         + tomcat_application_item.1 }}

@@ -1,0 +1,124 @@
+---
+
+molecule_hosts:
+  vars:
+    mysql_datasource_template:
+      name: >-
+        {{ "jdbc/"
+           + tomcat_application_name
+           + "DS"
+           + "%02d" | format(tomcat_application_datasource_index1 | int) }}
+      auth: Container
+      factory: org.apache.tomcat.jdbc.pool.DataSourceFactory
+      type: javax.sql.DataSource
+      driverClassName: com.mysql.jdbc.Driver
+      url: "jdbc:mysql://{{ tomcat_application_datasource._server }}"
+      testWhileIdle: "false"
+      testOnBorrow: "true"
+      testOnReturn: "false"
+      validationQuery: "SELECT 1 FROM DUAL"
+      validationInterval: 30000
+      timeBetweenEvictionRunsMillis: 30000
+      maxTotal: 100
+      minIdle: 0
+      maxIdle: 30
+      maxWaitMilli: 10000
+      initialSize: 5
+      maxActive: 100
+      maxWait: 10000
+      parameters: ['useSSL=false']
+
+    tomcat_application_name: sample
+
+    tomcat_application_instances:
+      - tomcat@server1
+      - tomcat@server2
+
+    tomcat_application_artifacts:
+      - id: sample_war
+        type: https
+        host: https://tomcat.apache.org
+        path: /tomcat-8.0-doc/appdev/sample
+        file: sample.war
+        dest: webapps
+        timeout: 120
+        validate_certs: no
+      - id: release_notes
+        type: https
+        host: https://archive.apache.org
+        path: /dist/tomcat/tomcat-8/v8.0.1
+        file: RELEASE-NOTES
+        dest: logs
+        timeout: 120
+        validate_certs: no
+      - id: sample2_war
+        type: http
+        host: "file:"
+        path: /tmp
+        file: sample2.war
+        dest: webapps
+        timeout: 120
+
+    tomcat_application_dirs:
+      - "config/{{ tomcat_application_name }}"
+      - "log/{{ tomcat_application_name }}"
+      - "cert/{{ tomcat_application_name }}"
+      - "data/{{ tomcat_application_name }}"
+      - "resource/{{ tomcat_application_name }}"
+
+    tomcat_application_datasources:
+      - name: "jdbc/{{ tomcat_application_name }}DS01"
+        template: mysql_datasource_template
+        user: app
+        password: app_password
+        _server: mysql.acme.com
+      - name: "jdbc/{{ tomcat_application_name }}DS02"
+        auth: Container
+        type: acme.jdbc.pool.AcmeDataSource
+        factory: acme.jdbc.pool.AcmeDataSourceFactory
+        driverClassName: acme.jdbc.AcmeDriver
+        maxTotal: 100
+        maxIdle: 30
+        maxWaitMilli: 10000
+        url: dbc:acme:@DATABASE
+        user: app
+        password: app_password
+
+    tomcat_application_managers:
+      - instance: tomcat@server1
+        url: http://localhost:8080
+        user: admin
+        password: admin
+        timeout: 5
+        retries: 5
+      - instance: tomcat@server2
+        url: http://localhost:8080
+        user: admin
+        password: admin
+        timeout: 5
+        retries: 5
+
+    tomcat_application_datasources_to_check:
+      - name: "jdbc/{{ tomcat_application_name }}DS01"
+        user: app
+        password: app_password
+        auth: Container
+        factory: org.apache.tomcat.jdbc.pool.DataSourceFactory
+        type: javax.sql.DataSource
+        driverClassName: com.mysql.jdbc.Driver
+        url: "jdbc:mysql://mysql.acme.com"
+        maxTotal: 100
+        maxIdle: 30
+        maxWaitMilli: 10000
+
+      - name: "jdbc/{{ tomcat_application_name }}DS02"
+        auth: Container
+        type: acme.jdbc.pool.AcmeDataSource
+        factory: acme.jdbc.pool.AcmeDataSourceFactory
+        driverClassName: acme.jdbc.AcmeDriver
+        maxTotal: 100
+        maxIdle: 30
+        maxWaitMilli: 10000
+        url: dbc:acme:@DATABASE
+        user: app
+        password: app_password

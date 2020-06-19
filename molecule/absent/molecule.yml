@@ -29,6 +29,7 @@ lint: |
 platforms:
   - name: "centos7-${INSTANCE_UUID:-1}"
     image: centos:7
+    dockerfile: ../resources/Dockerfile.j2
     command: /sbin/init
     tmpfs:
       - /run
@@ -41,6 +42,7 @@ platforms:
       - molecule_hosts_centos_7
   - name: "fedora29-${INSTANCE_UUID:-1}"
     image: fedora:29
+    dockerfile: ../resources/Dockerfile.j2
     command: /sbin/init
     tmpfs:
       - /run
@@ -53,6 +55,7 @@ platforms:
       - molecule_hosts_fedora_29
   - name: "fedora30-${INSTANCE_UUID:-1}"
     image: fedora:30
+    dockerfile: ../resources/Dockerfile.j2
     command: /sbin/init
     tmpfs:
       - /run
@@ -65,73 +68,11 @@ platforms:
       - molecule_hosts_fedora_30
 provisioner:
   name: ansible
-  playbooks:
-    converge: ../resources/converge.yml
   config_options:
     defaults:
       callback_whitelist: profile_tasks
-      action_plugins: $PWD/action_plugins
   inventory:
-    group_vars:
-      molecule_hosts:
-        tomcat_application_name: sample
-        tomcat_application_instances:
-          - tomcat@server1
-          - tomcat@server2
-        tomcat_application_artifacts:
-          - id: sample_war
-            type: https
-            host: https://tomcat.apache.org
-            path: /tomcat-8.0-doc/appdev/sample
-            file: sample.war
-            dest: webapps
-            timeout: 120
-            validate_certs: no
-          - id: release_notes
-            type: https
-            host: https://archive.apache.org
-            path: /dist/tomcat/tomcat-8/v8.0.1
-            file: RELEASE-NOTES
-            dest: logs
-            timeout: 120
-            validate_certs: no
-          - id: sample2_war
-            type: http
-            host: "file:"
-            path: /tmp
-            file: sample2.war
-            dest: webapps
-            timeout: 120
-        tomcat_application_dirs:
-          - "config/{{ tomcat_application_name }}"
-          - "log/{{ tomcat_application_name }}"
-          - "cert/{{ tomcat_application_name }}"
-          - "data/{{ tomcat_application_name }}"
-          - "resource/{{ tomcat_application_name }}"
-        tomcat_application_datasources:
-          - name: "jdbc/{{ tomcat_application_name }}DS01"
-            auth: Container
-            type: acme.jdbc.pool.AcmeDataSource
-            factory: acme.jdbc.pool.AcmeDataSourceFactory
-            driverClassName: acme.jdbc.AcmeDriver
-            maxTotal: 100
-            maxIdle: 30
-            maxWaitMilli: 10000
-            url: dbc:acme:@DATABASE
-            user: app
-            password: app_password
-          - name: "jdbc/{{ tomcat_application_name }}DS02"
-            auth: Container
-            type: acme.jdbc.pool.AcmeDataSource
-            factory: acme.jdbc.pool.AcmeDataSourceFactory
-            driverClassName: acme.jdbc.AcmeDriver
-            maxTotal: 100
-            maxIdle: 30
-            maxWaitMilli: 10000
-            url: dbc:acme:@DATABASE
-            user: app
-            password: app_password
-        tomcat_application_state: absent
-        tomcat_application_dirs_remove: true
+    links:
+      hosts: ../resources/inventory.yml
 verifier:
   name: ansible

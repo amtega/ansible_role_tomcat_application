@@ -38,9 +38,10 @@ dependencies:
   - role: amtega.packages
     vars:
       packages_os:
+        all:
+          all:
+            procps-ng: present
         centos:
-          6:
-            python-lxml: absent
           7:
             python-lxml: present
         fedora:
@@ -48,17 +49,8 @@ dependencies:
             python2-lxml: present
             python3-lxml: present
         rhel:
-          6:
-            python-lxml: abbsent
           7:
             python-lxml: present
-      packages_python:
-        centos:
-          6:
-            lxml==4.2.6: present
-        rhel:
-          6:
-            lxml==4.2.6: present
 
   - role: amtega.artifact
     tags:

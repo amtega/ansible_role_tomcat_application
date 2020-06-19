@@ -1,0 +1,6 @@
+---
+
+- include_role:
+    name: amtega.tomcat_application
+  vars:
+    tomcat_application_state: present

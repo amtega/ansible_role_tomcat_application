@@ -35,7 +35,7 @@
       loop: >-
         {{ query('nested',
                  tomcat_application_server_instances,
-                 tomcat_application_datasources_deployed) }}
+                 tomcat_application_datasources_to_check) }}
       loop_control:
         label: "{{ item.0.name }} {{ item.1.name }}"
 
@@ -82,5 +82,5 @@
       - name: tomcat@server2
         base: /srv/tomcat/tomcat@server2
 
-    tomcat_application_datasources_deployed: >-
+    tomcat_application_datasources_to_check: >-
       {{ tomcat_application_datasources }}
