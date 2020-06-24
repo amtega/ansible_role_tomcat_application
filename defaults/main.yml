@@ -21,7 +21,11 @@ tomcat_application_dirs: []
 
 # Remove applications directories when application state is absent
 
-tomcat_application_dirs_remove: false
+tomcat_application_dirs_remove: no
+
+# Ignore erroros during applications directories removal
+
+tomcat_application_dirs_remove_ignore_errors: yes
 
 # List of application datasources to provisione. The dicts must have the
 # datasources attributes you want to use, for example this ones:
