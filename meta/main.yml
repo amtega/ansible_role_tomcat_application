@@ -31,7 +31,7 @@ dependencies:
       check_platform_distributions:
         centos: 7
         fedora: 29
-        rhel: 7
+        redhat: 7
       check_platform_variables:
         - tomcat_application_name
 
@@ -48,7 +48,7 @@ dependencies:
           all:
             python2-lxml: present
             python3-lxml: present
-        rhel:
+        redhat:
           7:
             python-lxml: present
 
