@@ -111,6 +111,10 @@ tomcat_application_artifacts: []
 # tomcat_application_instance_startup:
 # tomcat_application_instance_shutdown:
 
+# Force tomcat instance restart
+
+tomcat_application_instance_force_restart: no
+
 # Number of seconds to wait after shutdown to startup tomcat instance again
 
 tomcat_application_instance_restart_pause: 1

@@ -7,7 +7,7 @@
     - artifact_result_item.changed
     - >-
       not tomcat_application_item.0.autodeploy
-      or tomcat_application_force | bool
+      or tomcat_application_instance_force_restart | bool
   loop: >-
     {{ query('nested',
              tomcat_application_server_instances,
