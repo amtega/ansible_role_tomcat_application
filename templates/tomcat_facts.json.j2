@@ -1,3 +1,28 @@
+{% if tomcat_application_instances_managed_by_role | bool %}
+
+{% set global_ns = namespace(found=false) %}
+{% for instance in tomcat_application_instances %}
+{% set global_ns.found = true %}
+- "name": "{{ instance }}"
+  "service": true
+  "base": "{{ hostvars[inventory_hostname].tomcat_base
+              | default('/srv/tomcat') }}"
+  "home": "{{ hostvars[inventory_hostname].tomcat_base
+              | default('/opt/tomcat') }}"
+  "user": "{{ hostvars[inventory_hostname].tomcat_user
+              | default('daemon') }}"
+  "group": "{{ hostvars[inventory_hostname].tomcat_group
+              | default('daemon') }}"
+  "autodeploy": {{ hostvars[inventory_hostname].tomcat_server_autodeploy
+                   | default(true)
+                   | bool }}
+  "jsvc": {{ hostvars[inventory_hostname].tomcat_use_native_daemon
+             | default(true)
+             | bool }}
+{% endfor %}
+
+{% else %}
+
 {% set global_ns = namespace(found=false) %}
 {% for process in tomcat_application_search_instances_result.stdout_lines
                   | default([]) %}
@@ -53,6 +78,8 @@
 {% endif %}
 
 {% endfor %}
+
+{% endif %}
 
 {% if not global_ns.found %}
 []
