@@ -111,7 +111,14 @@ tomcat_application_artifacts: []
 # tomcat_application_instance_startup:
 # tomcat_application_instance_shutdown:
 
-# Force tomcat instance restart
+# Indicate if the role should restart tomcat instance if is necessary
+# If set to `no` tomcat instance will not being restarted
+
+tomcat_application_instance_restart_enabled: yes
+
+# Force tomcat instance restart. Keep in mind that variable
+# `tomcat_application_instance_restart_enabled` must also be set to `yes`
+# to force restarts
 
 tomcat_application_instance_force_restart: no
 
@@ -154,6 +161,11 @@ tomcat_application_managers: {}
 # Force application deployment
 
 tomcat_application_force: no
+
+# Indicate if tomcat instances are managed by amtega.tomcat role. If set to
+# 'yes' deployment speed will increase
+
+tomcat_application_instances_managed_by_role: no
 
 # Hide sensitive information
 

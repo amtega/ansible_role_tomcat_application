@@ -2,49 +2,52 @@
 # Tasks to get tomcat instances facts
 
 - block:
-    - name: Search tomcat raw server instances processes
-      shell: >-
-        ps axo "%u,%g,%a"
-        | grep {{ tomcat_application_server_main_class }}
-        | grep -v grep
-        | uniq
-      args:
-        warn: no
-      register: tomcat_application_search_instances_result
-      changed_when: false
-      failed_when: false
+    - when: not tomcat_application_instances_managed_by_role | bool
+      block:
+        - name: Search tomcat raw server instances processes
+          shell: >-
+            ps axo "%u,%g,%a"
+            | grep {{ tomcat_application_server_main_class }}
+            | grep -v grep
+            | uniq
+          args:
+            warn: no
+          register: tomcat_application_search_instances_result
+          changed_when: false
+          failed_when: false
 
-    - name: Check instances autodeploy settings
-      xml:
-        path: "{{ tomcat_application_config_path }}"
-        xpath: "{{ tomcat_application_host_xpath }}"
-        content: attribute
-      register: tomcat_application_check_autodeploy_result
-      loop: >-
-        {{ tomcat_application_search_instances_result.stdout_lines
-           | default([]) }}
-      loop_control:
-        loop_var: tomcat_application_item
-        label: "{{ tomcat_application_tomcat_base }}"
-      vars:
-        tomcat_application_fields: >-
-          {{ tomcat_application_item.split(',') | map('trim') | list }}
-        tomcat_application_command: "{{ tomcat_application_fields[2] }}"
-        tomcat_application_tomcat_base: >-
-          {{ tomcat_application_command.split("-D")
-            | select("match", "catalina.base")
-            | first
-            | regex_replace("catalina.base=", "")
-            | trim }}
-        tomcat_application_service_xpath: "/Server/Service[@name='Catalina']"
-        tomcat_application_engine_xpath: >-
-          {{ tomcat_application_service_xpath }}/Engine[@name='Catalina']
-        tomcat_application_host_xpath: >-
-          {{ tomcat_application_engine_xpath }}/Host[@name='localhost']
-        tomcat_application_config_path: >-
-          {{ tomcat_application_tomcat_base
-             +"/"
-             + tomcat_application_server_config }}
+        - name: Check instances autodeploy settings
+          xml:
+            path: "{{ tomcat_application_config_path }}"
+            xpath: "{{ tomcat_application_host_xpath }}"
+            content: attribute
+          register: tomcat_application_check_autodeploy_result
+          loop: >-
+            {{ tomcat_application_search_instances_result.stdout_lines
+               | default([]) }}
+          loop_control:
+            loop_var: tomcat_application_item
+            label: "{{ tomcat_application_tomcat_base }}"
+          vars:
+            tomcat_application_fields: >-
+              {{ tomcat_application_item.split(',') | map('trim') | list }}
+            tomcat_application_command: "{{ tomcat_application_fields[2] }}"
+            tomcat_application_tomcat_base: >-
+              {{ tomcat_application_command.split("-D")
+                | select("match", "catalina.base")
+                | first
+                | regex_replace("catalina.base=", "")
+                | trim }}
+            tomcat_application_service_xpath: >-
+              /Server/Service[@name='Catalina']
+            tomcat_application_engine_xpath: >-
+              {{ tomcat_application_service_xpath }}/Engine[@name='Catalina']
+            tomcat_application_host_xpath: >-
+              {{ tomcat_application_engine_xpath }}/Host[@name='localhost']
+            tomcat_application_config_path: >-
+              {{ tomcat_application_tomcat_base
+                 +"/"
+                 + tomcat_application_server_config }}
 
     - name: Setup tomcat instances facts
       set_fact:

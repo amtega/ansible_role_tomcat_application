@@ -3,6 +3,7 @@
 
 - name: Determining if it is necessary to restart the tomcat service
   command: /bin/true
+  when: tomcat_application_instance_restart_enabled | bool
   changed_when:
     - artifact_result_item.changed
     - >-
