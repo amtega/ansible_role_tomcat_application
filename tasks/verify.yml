@@ -17,7 +17,9 @@
       retries: "{{ tomcat_application_manager.0.retries | default(0) }}"
       delay: "{{ tomcat_application_manager.0.delay | default(0) }}"
       until: tomcat_appliction_manager_check
-      when: tomcat_application_manager | length > 0
+      when:
+        - tomcat_application_manager | length > 0
+        - tomcat_artifacts_deployed | length > 0
       no_log: "{{ tomcat_application_no_log }}"
       loop: "{{ tomcat_application_instances }}"
       loop_control:
