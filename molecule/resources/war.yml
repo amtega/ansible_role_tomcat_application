@@ -4,5 +4,5 @@
   get_url:
     url: https://tomcat.apache.org/tomcat-8.0-doc/appdev/sample/sample.war
     dest: /tmp/sample2.war
-    validate_certs: false
+    validate_certs: no
     timeout: 60

@@ -20,6 +20,7 @@
         label: >-
           {{ tomcat_application_item.0.base }}/{{ tomcat_application_item.1 }}
 
+    # noqa ignore-errors
     - name: Remove application directories
       file:
         path: >-

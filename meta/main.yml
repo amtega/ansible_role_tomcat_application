@@ -3,19 +3,21 @@
 
 galaxy_info:
   role_name: tomcat_application
+  namespace: amtega
   author: Juan Antonio Valiño García
   description: Deploy a tomcat application and its datasources and directories
   company: AMTEGA - Xunta de Galicia
   license: GPLv3 or EUPL
-  min_ansible_version: 2.9
+  min_ansible_version: 2.10
   platforms:
     - name: EL
       versions:
         - 7
+        - 8
     - name: Fedora
       versions:
-        - 29
-        - 30
+        - 33
+        - 34
   galaxy_tags:
     - tomcat
     - jee
@@ -28,7 +30,7 @@ dependencies:
     vars:
       check_platform_distributions:
         centos: 7
-        fedora: 29
+        fedora: 33
         redhat: 7
       check_platform_variables:
         - tomcat_application_name
@@ -40,14 +42,13 @@ dependencies:
           all:
             procps-ng: present
         centos:
-          7:
+          all:
             python-lxml: present
         fedora:
           all:
-            python2-lxml: present
             python3-lxml: present
         redhat:
-          7:
+          all:
             python-lxml: present
 
   - role: amtega.artifact
