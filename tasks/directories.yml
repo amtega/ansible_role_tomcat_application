@@ -20,7 +20,7 @@
         label: >-
           {{ tomcat_application_item.0.base }}/{{ tomcat_application_item.1 }}
 
-    - name: Remove application directories
+    - name: Remove application directories # noqa ignore-errors
       file:
         path: >-
           {{ tomcat_application_item.0.base }}/{{ tomcat_application_item.1 }}
@@ -36,8 +36,7 @@
         loop_var: tomcat_application_item
         label: >-
           {{ tomcat_application_item.0.base }}/{{ tomcat_application_item.1 }}
-      ignore_errors: >- # noqa ignore-errors
-        {{ tomcat_application_dirs_remove_ignore_errors }}
+      ignore_errors: "{{ tomcat_application_dirs_remove_ignore_errors }}"
   tags:
     - role::tomcat_application
     - role::tomcat_application::directories
