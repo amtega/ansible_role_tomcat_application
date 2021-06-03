@@ -42,14 +42,18 @@ dependencies:
           all:
             procps-ng: present
         centos:
-          all:
+          7:
             python-lxml: present
+          8:
+            python3-lxml: present
         fedora:
           all:
             python3-lxml: present
         redhat:
-          all:
+          7:
             python-lxml: present
+          8:
+            python3-lxml: present
 
   - role: amtega.artifact
     tags:
