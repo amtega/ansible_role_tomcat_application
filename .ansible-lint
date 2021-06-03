@@ -4,5 +4,6 @@ exclude_paths:
   - meta
   - molecule/absent/prepare_applications.yml
   - molecule/resources/inventory.yml
+  - molecule/resources/java.yml
   - molecule/resources/tomcat.yml
   - molecule/resources/war.yml

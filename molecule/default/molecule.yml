@@ -73,7 +73,7 @@ provisioner:
     side_effect: ../resources/side_effect.yml
   config_options:
     defaults:
-      callback_whitelist: profile_tasks
+      callback_enabled: profile_tasks
       action_plugins: $PWD/action_plugins
   inventory:
     links:
