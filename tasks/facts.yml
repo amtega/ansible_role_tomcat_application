@@ -13,8 +13,8 @@
           args:
             warn: no
           register: tomcat_application_search_instances_result
-          changed_when: false
-          failed_when: false
+          changed_when: no
+          failed_when: no
 
         - name: Check instances autodeploy settings
           xml:

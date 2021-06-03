@@ -2,7 +2,8 @@
 # Role verify tasks
 
 - block:
-    - meta: flush_handlers
+    - name: FLush handlers
+      meta: flush_handlers
 
     - name: Verify application deployment in tomcat manager
       uri:

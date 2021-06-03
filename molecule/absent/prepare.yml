@@ -4,6 +4,7 @@
   hosts: molecule_hosts
   gather_facts: no
   tasks:
+    - include_tasks: ../resources/java.yml
     - include_tasks: ../resources/tomcat.yml
     - include_tasks: ../resources/war.yml
     - include_tasks: prepare_applications.yml

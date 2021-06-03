@@ -34,7 +34,7 @@
         state: >-
           {{ (not ds_attribute_to_remove)
              | ternary("present", "absent") }}
-        pretty_print: true
+        pretty_print: yes
       register: tomcat_application_setup_ds_result
       when: tomcat_application_state == "present"
       loop: >-
@@ -71,7 +71,7 @@
              + tomcat_application_context_config }}
         xpath: "/Context/Resource[@name='{{ tomcat_application_item.1.name }}']"
         state: absent
-        pretty_print: true
+        pretty_print: yes
       when: tomcat_application_state == "absent"
       register: tomcat_application_remove_ds_result
       loop: >-
