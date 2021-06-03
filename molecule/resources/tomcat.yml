@@ -5,7 +5,7 @@
   vars:
     tomcat_name: tomcat@server1
     tomcat_base: /srv/tomcat/tomcat@server1
-    tomcat_version: 8.0.9
+    tomcat_version: 9.0.44
     tomcat_use_native_daemon: yes
     tomcat_server_port: 8006
     tomcat_server_http_port: 8080
@@ -26,6 +26,7 @@
           - manager-script
           - manager-jmx
           - manager-status
+    tomcat_java_setup: no
 
 - include_role:
     name: amtega.tomcat
@@ -53,3 +54,4 @@
           - manager-script
           - manager-jmx
           - manager-status
+    tomcat_java_setup: no
