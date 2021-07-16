@@ -42,17 +42,31 @@
       assert:
         that: tomcat_application_item.state == tomcat_application_state
         success_msg: >-
-          Application {{ tomcat_application_name }}
-          {{ tomcat_application_state }}
-          in {{ tomcat_application_item.instance }} instance
+          {{ tomcat_application_deploy_message_map
+             [tomcat_application_state].success }}
         fail_msg: >-
-          Application {{ tomcat_application_name }} failed to be
-          {{ tomcat_application_state }} in
-          {{ tomcat_application_item.instance }} instance
+          {{ tomcat_application_deploy_message_map
+             [tomcat_application_state].fail }}
       loop: "{{ lookup('template', 'verify.yml.j2') | from_yaml }}"
       loop_control:
         loop_var: tomcat_application_item
         label: "{{ tomcat_application_item.instance }}"
+      vars:
+        tomcat_application_deploy_message_map:
+          absent:
+            success: >-
+              Application {{ tomcat_application_name }} has been undeployed
+              successfuly from instance {{ tomcat_application_item.instance }}
+            fail: >-
+              Application {{ tomcat_application_name }} FAILED to be undeployed
+              from instance {{ tomcat_application_item.instance }}
+          present:
+            success: >-
+              Application {{ tomcat_application_name }} has been deployed
+              successfuly into instance {{ tomcat_application_item.instance }}
+            fail: >-
+              Application {{ tomcat_application_name }} FAILED to be deployed
+              into instance {{ tomcat_application_item.instance }}
   tags:
     - role::tomcat_application
     - role::tomcat_application::verify
