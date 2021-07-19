@@ -1,6 +1,12 @@
 ---
 # Role tasks
 
+- name: Setup packages
+  include_tasks: packages.yml
+  tags:
+    - role::tomcat_application
+    - role::tomcat_application::packages
+
 - name: Gather tomcat instances facts
   include_tasks: facts.yml
   tags:

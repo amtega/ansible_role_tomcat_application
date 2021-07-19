@@ -6,3 +6,4 @@
     name: amtega.artifact
   vars:
     artifact_list: "{{ tomcat_artifacts_deployed }}"
+    artifact_skip_packages: "{{ tomcat_application_skip_packages }}"
