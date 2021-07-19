@@ -1,0 +1,28 @@
+---
+# Setup packages
+
+- name: Setup packages
+  include_role:
+    name: amtega.packages
+  vars:
+    packages_os:
+      all:
+        all:
+          procps-ng: present
+      centos:
+        7:
+          python-lxml: present
+        8:
+          python3-lxml: present
+      fedora:
+        all:
+          python3-lxml: present
+      redhat:
+        7:
+          python-lxml: present
+        8:
+          python3-lxml: present
+  when: not tomcat_application_skip_packages | bool
+  tags:
+    - role::tomcat_application
+    - role::tomcat_application::packages
