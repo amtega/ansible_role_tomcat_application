@@ -170,3 +170,8 @@ tomcat_application_instances_managed_by_role: no
 # Hide sensitive information
 
 tomcat_application_no_log: yes
+
+# Indicate if the role must skip operating system packages related tasks,
+# something that can be useful if you want to speed up things
+
+tomcat_application_skip_packages: no
