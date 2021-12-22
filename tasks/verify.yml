@@ -33,10 +33,11 @@
              | list }}
         tomcat_appliction_manager_check: >-
           {{ (tomcat_application_state == "present")
-             | ternary(tomcat_application_manager_result.content
-                       is search("/" + tomcat_application_name + ":running"),
-                       not tomcat_application_manager_result.content
-                       is search("/" + tomcat_application_name + ":")) }}
+             | ternary(
+                 tomcat_application_manager_result.content
+                 is search("/" + tomcat_application_name_to_check + ":running"),
+                 not tomcat_application_manager_result.content
+                 is search("/" + tomcat_application_name_to_check + ":")) }}
 
     - name: Assert that application was deployed correctly
       assert:
@@ -55,18 +56,23 @@
         tomcat_application_deploy_message_map:
           absent:
             success: >-
-              Application {{ tomcat_application_name }} has been undeployed
-              successfuly from instance {{ tomcat_application_item.instance }}
+              Application {{ tomcat_application_name_to_check }} has been
+              undeployed successfuly from instance
+              {{ tomcat_application_item.instance }}
             fail: >-
-              Application {{ tomcat_application_name }} FAILED to be undeployed
-              from instance {{ tomcat_application_item.instance }}
+              Application {{ tomcat_application_name_to_check }} FAILED to be
+              undeployed from instance {{ tomcat_application_item.instance }}
           present:
             success: >-
-              Application {{ tomcat_application_name }} has been deployed
-              successfuly into instance {{ tomcat_application_item.instance }}
+              Application {{ tomcat_application_name_to_check }} has been
+              deployed successfuly into instance
+              {{ tomcat_application_item.instance }}
             fail: >-
-              Application {{ tomcat_application_name }} FAILED to be deployed
-              into instance {{ tomcat_application_item.instance }}
+              Application {{ tomcat_application_name_to_check }} FAILED to be
+              deployed into instance {{ tomcat_application_item.instance }}
+  vars:
+    tomcat_application_name_to_check: >-
+      {{ tomcat_application_name | regex_replace("#", "/") }}
   tags:
     - role::tomcat_application
     - role::tomcat_application::verify
