@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.9.0] - 2022-01-20
+### Changed
+- Supported distros.
+
 ## [1.8.1] - 2021-12-22
 ### Fixed
 - Application deployment verification when context contains `#` character. Related to ansible/main#243
