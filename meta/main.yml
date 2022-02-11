@@ -30,14 +30,14 @@ dependencies:
     vars:
       check_platform_distributions:
         centos: 7
-        fedora: 33
+        fedora: 34
         redhat: 7
       check_platform_variables:
         - tomcat_application_name
 
   - role: amtega.packages
     tags:
-      - never    
+      - never
 
   - role: amtega.artifact
     tags:
