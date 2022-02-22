@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.9.2] - 2022-02-22
+### Changed
+- Adapted for CentOS derived distros. Related to ansible/main#263
+
 ## [1.9.1] - 2022-02-11
 ### Changed
 - Changed testing images.
