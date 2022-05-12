@@ -19,6 +19,10 @@ tomcat_application_state: present
 
 tomcat_application_dirs: []
 
+# Mode for application directories defined previously
+
+tomcat_application_dirs_mode: "0750"
+
 # Remove applications directories when application state is absent
 
 tomcat_application_dirs_remove: no

@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.10.0] - 2022-05-12
+### Added
+- Added tomcat_application_dirs_mode option. Related to ansible/playbooks/tomcat#133
+
 ## [1.9.2] - 2022-02-22
 ### Changed
 - Adapted for CentOS derived distros. Related to ansible/main#263
