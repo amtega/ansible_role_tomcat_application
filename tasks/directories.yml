@@ -9,7 +9,7 @@
         state: directory
         owner: "{{ tomcat_application_item.0.user }}"
         group: "{{ tomcat_application_item.0.group }}"
-        mode: "0770"
+        mode: "{{ tomcat_application_dirs_mode }}"
       when: tomcat_application_state == "present"
       loop: >-
         {{ query('nested',
